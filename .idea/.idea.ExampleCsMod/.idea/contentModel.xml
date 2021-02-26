@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="C:\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\Modules\ExampleCsMod\bin\Win64_Shipping_Client" t="ExcludeRecursive" />
+    <e p="C:\Users\chess\AppData\Local\JetBrains\Rider2020.3\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\chess\AppData\Local\JetBrains\Rider2020.3\resharper-host\Local\Transient\Rider\v203\SolutionCaches\_ExampleCsMod.131191489.00" t="ExcludeRecursive" />
+    <e p="C:\Users\chess\ModProjects\ExampleCsMod" t="IncludeFlat">
+      <e p="ExampleCsMod" t="IncludeRecursive">
+        <e p="ExampleCsMod.csproj" t="IncludeRecursive" />
+        <e p="MySubModule.cs" t="Include" />
+        <e p="obj" t="ExcludeRecursive" />
+        <e p="Properties" t="Include">
+          <e p="AssemblyInfo.cs" t="Include" />
+        </e>
+      </e>
+      <e p="ExampleCsMod.sln" t="IncludeFlat" />
+      <e p="packages" t="ExcludeRecursive" />
+    </e>
+  </component>
+</project>
