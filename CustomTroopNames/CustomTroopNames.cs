@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
+using TaleWorlds.InputSystem;
 using TaleWorlds.Localization;
 using TaleWorlds.MountAndBlade;
 
@@ -15,6 +16,14 @@ namespace CustomTroopNames {
             mission.AddMissionBehaviour(new RenameTroopsBehavior());
         }
 
+        protected override void OnApplicationTick(float dt) {
+            base.OnApplicationTick(dt);
+            if (Input.IsKeyPressed(InputKey.Tilde)) {
+                Campaign.Current?.GetCampaignBehavior<CustomTroopNamesCampaignBehavior>()
+                    ?.PrintDebug();
+            }
+        }
+
         protected override void OnGameStart(Game game, IGameStarter gameStarter) {
             base.OnGameStart(game, gameStarter);
             if (!(game.GameType is Campaign)) return;
@@ -22,9 +31,40 @@ namespace CustomTroopNames {
             campaignStarter.AddBehavior(new CustomTroopNamesCampaignBehavior());
         }
     }
+    internal class CustomTroopNameManager {
+        private const char Sep = '%';
+
+        private Dictionary<string, string> _troopNameMapping =
+            new Dictionary<string, string>();
+        
+        public void TroopRecruited(CharacterObject unit, string customName) {
+            var unitName = unit.Name.ToString();
+            if (_troopNameMapping.TryGetValue(unitName, out var troops)) {
+                _troopNameMapping[unitName] = troops + $"{Sep}{customName}";
+            }
+            else {
+                _troopNameMapping.Add(unitName, customName);
+            }
+        }
+
+        public void PrintDebug() {
+            foreach (var pair in _troopNameMapping) {
+                var troopName = pair.Key;
+                foreach (var customName in pair.Value.Split(Sep)) {
+                    InformationManager.DisplayMessage(new InformationMessage
+                        ($"{troopName} {customName}"));
+                }
+            }
+        }
+        
+        public void SyncData(IDataStore dataStore) {
+            dataStore.SyncData("_troopNameMapping", ref _troopNameMapping);
+        }
+    }
 
     public class CustomTroopNamesCampaignBehavior : CampaignBehaviorBase {
-        private string _customName = "Initial";
+        private readonly CustomTroopNameManager _troopManager =
+            new CustomTroopNameManager();
 
         private List<CharacterObject> _textPromptsToShow = new List<CharacterObject>();
         private Task _flushTextPromptsTask;
@@ -36,21 +76,19 @@ namespace CustomTroopNames {
             var doneNaming = false;
             foreach (var unit in textPrompts) {
                 await ShowTextInquiryAsync((new TextInquiryData("Name Troop",
-                $"Assign custom name to {unit.Name}?  (Leave blank to stop naming troops)",
-                true, false, "Set Name", "Don't name",
-                s => {
-                    if (s.Length > 0) {
-                        _customName = s;
-                    }
-                    else {
-                        doneNaming = true;
-                    }
-                },
-                // This currently doesn't work - negativeAction appears to not fire at all if the negative button is clicked
-                // For now working around it by leaving the input blank
-                () => {
-                    doneNaming = true;
-                })));
+                    $"Assign custom name to {unit.Name}?  (Leave blank to stop naming troops)",
+                    true, false, "Set Name", "Don't name",
+                    customName => {
+                        if (customName.Length > 0) {
+                            _troopManager.TroopRecruited(unit, customName);
+                        }
+                        else {
+                            doneNaming = true;
+                        }
+                    },
+                    // This currently doesn't work - negativeAction appears to not fire at all if the negative button is clicked
+                    // For now working around it by leaving the input blank
+                    () => { doneNaming = true; })));
                 if (doneNaming) break;
             }
         }
@@ -83,15 +121,23 @@ namespace CustomTroopNames {
                     _textPromptsToShow.Add(unit);
                     if (_flushTextPromptsTask == null) {
                         _flushTextPromptsTask = Task.Run(async delegate {
-                            await Task.Delay(100);
+                            await Task.Delay(500);
                             FlushTextPrompts();
                         });
                     }
                 });
+            CampaignEvents.PlayerUpgradedTroopsEvent.AddNonSerializedListener(this,
+                (unit, newUnit, i) => {
+                    Debug.WriteLine($"{unit.Name} digivolved to ${newUnit.Name}");
+                });
+        }
+
+        public void PrintDebug() {
+            _troopManager.PrintDebug();
         }
 
         public override void SyncData(IDataStore dataStore) {
-            dataStore.SyncData("_customName", ref _customName);
+            _troopManager.SyncData(dataStore);
         }
     }
 
