@@ -7,6 +7,7 @@ using TaleWorlds.Core;
 using TaleWorlds.InputSystem;
 using TaleWorlds.Localization;
 using TaleWorlds.MountAndBlade;
+using TaleWorlds.SaveSystem;
 
 namespace CustomTroopNames {
     [UsedImplicitly]
@@ -31,32 +32,40 @@ namespace CustomTroopNames {
             campaignStarter.AddBehavior(new CustomTroopNamesCampaignBehavior());
         }
     }
-    internal class CustomTroopNameManager {
-        private const char Sep = '%';
 
-        private Dictionary<string, string> _troopNameMapping =
-            new Dictionary<string, string>();
-        
+    [UsedImplicitly]
+    public class MySaveDefiner : SaveableTypeDefiner {
+        public MySaveDefiner() : base(48211205) { }
+
+        protected override void DefineContainerDefinitions() {
+            ConstructContainerDefinition(typeof(Dictionary<string, List<string>>));
+        }
+    }
+
+    public class CustomTroopNameManager {
+        private Dictionary<string, List<string>> _troopNameMapping =
+            new Dictionary<string, List<string>>();
+
         public void TroopRecruited(CharacterObject unit, string customName) {
             var unitName = unit.Name.ToString();
             if (_troopNameMapping.TryGetValue(unitName, out var troops)) {
-                _troopNameMapping[unitName] = troops + $"{Sep}{customName}";
+                troops.Add(customName);
             }
             else {
-                _troopNameMapping.Add(unitName, customName);
+                _troopNameMapping.Add(unitName, new List<string>() {customName});
             }
         }
 
         public void PrintDebug() {
             foreach (var pair in _troopNameMapping) {
                 var troopName = pair.Key;
-                foreach (var customName in pair.Value.Split(Sep)) {
+                foreach (var customName in pair.Value) {
                     InformationManager.DisplayMessage(new InformationMessage
                         ($"{troopName} {customName}"));
                 }
             }
         }
-        
+
         public void SyncData(IDataStore dataStore) {
             dataStore.SyncData("_troopNameMapping", ref _troopNameMapping);
         }
