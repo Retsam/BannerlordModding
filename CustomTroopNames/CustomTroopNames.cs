@@ -34,34 +34,49 @@ namespace CustomTroopNames {
     }
 
     [UsedImplicitly]
-    public class MySaveDefiner : SaveableTypeDefiner {
-        public MySaveDefiner() : base(48211205) { }
+    public class CustomTroopNamesSaveableTypeDefiner : SaveableTypeDefiner {
+        public CustomTroopNamesSaveableTypeDefiner() : base(48211205) { }
+
+        protected override void DefineClassTypes() {
+            AddClassDefinition(typeof(CustomTroopInfo), 1);
+        }
 
         protected override void DefineContainerDefinitions() {
-            ConstructContainerDefinition(typeof(Dictionary<string, List<string>>));
+            ConstructContainerDefinition(typeof(List<CustomTroopInfo>));
+            ConstructContainerDefinition(typeof(Dictionary<string, List<CustomTroopInfo>>));
         }
+    }
+    
+    public class CustomTroopInfo {
+        public CustomTroopInfo(string name) {
+            Name = name;
+        }
+        [SaveableField(1)] public string Name;
+
+        [SaveableField(2)] public int Kills = 0;
     }
 
     public class CustomTroopNameManager {
-        private Dictionary<string, List<string>> _troopNameMapping =
-            new Dictionary<string, List<string>>();
+        private Dictionary<string, List<CustomTroopInfo>> _troopNameMapping =
+            new Dictionary<string, List<CustomTroopInfo>>();
 
         public void TroopRecruited(CharacterObject unit, string customName) {
             var unitName = unit.Name.ToString();
+            var troopInfo = new CustomTroopInfo(customName);
             if (_troopNameMapping.TryGetValue(unitName, out var troops)) {
-                troops.Add(customName);
+                troops.Add(troopInfo);
             }
             else {
-                _troopNameMapping.Add(unitName, new List<string>() {customName});
+                _troopNameMapping.Add(unitName, new List<CustomTroopInfo>() {troopInfo});
             }
         }
 
         public void PrintDebug() {
             foreach (var pair in _troopNameMapping) {
                 var troopName = pair.Key;
-                foreach (var customName in pair.Value) {
+                foreach (var troopInfo in pair.Value) {
                     InformationManager.DisplayMessage(new InformationMessage
-                        ($"{troopName} {customName}"));
+                        ($"{troopName} {troopInfo.Name}"));
                 }
             }
         }
