@@ -46,7 +46,7 @@ namespace CustomTroopNames {
             ConstructContainerDefinition(typeof(Dictionary<string, List<CustomTroopInfo>>));
         }
     }
-    
+
     public class CustomTroopInfo {
         public CustomTroopInfo(string name) {
             Name = name;
@@ -61,14 +61,30 @@ namespace CustomTroopNames {
             new Dictionary<string, List<CustomTroopInfo>>();
 
         public void TroopRecruited(CharacterObject unit, string customName) {
+            AddTroop(unit, new CustomTroopInfo(customName));
+        }
+
+        public void AddTroop(CharacterObject unit, CustomTroopInfo newTroop) {
             var unitName = unit.Name.ToString();
-            var troopInfo = new CustomTroopInfo(customName);
             if (_troopNameMapping.TryGetValue(unitName, out var troops)) {
-                troops.Add(troopInfo);
+                troops.Add(newTroop);
             }
             else {
-                _troopNameMapping.Add(unitName, new List<CustomTroopInfo>() {troopInfo});
+                _troopNameMapping.Add(unitName, new List<CustomTroopInfo>() {newTroop});
             }
+        }
+
+        public void TroopUpgraded(CharacterObject oldType, CharacterObject newType) {
+            if (!_troopNameMapping.TryGetValue(oldType.Name.ToString(), out var troops)) {
+                return;
+            }
+
+            var troopInfo = troops[0];
+            troops.Remove(troopInfo);
+
+            AddTroop(newType, troopInfo);
+            InformationManager.DisplayMessage(new InformationMessage(
+                ($"{troopInfo.Name} has been promoted to {newType.Name}")));
         }
 
         public void PrintDebug() {
@@ -151,8 +167,11 @@ namespace CustomTroopNames {
                     }
                 });
             CampaignEvents.PlayerUpgradedTroopsEvent.AddNonSerializedListener(this,
-                (unit, newUnit, i) => {
-                    Debug.WriteLine($"{unit.Name} digivolved to ${newUnit.Name}");
+                (unit, newUnit, howMany) => {
+                    for(var i=0; i<howMany; i++) {
+                        _troopManager.TroopUpgraded(unit, newUnit);
+                        Debug.WriteLine($"{unit.Name} digivolved to ${newUnit.Name}");
+                    }
                 });
         }
 
