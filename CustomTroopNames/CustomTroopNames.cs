@@ -64,7 +64,7 @@ namespace CustomTroopNames {
             AddTroop(unit, new CustomTroopInfo(customName));
         }
 
-        public void AddTroop(CharacterObject unit, CustomTroopInfo newTroop) {
+        private void AddTroop(CharacterObject unit, CustomTroopInfo newTroop) {
             var unitName = unit.Name.ToString();
             if (_troopNameMapping.TryGetValue(unitName, out var troops)) {
                 troops.Add(newTroop);
@@ -85,6 +85,11 @@ namespace CustomTroopNames {
             AddTroop(newType, troopInfo);
             InformationManager.DisplayMessage(new InformationMessage(
                 ($"{troopInfo.Name} has been promoted to {newType.Name}")));
+        }
+
+        // Clones the _troopNameMapping dictionary into a new one that will be mutated in order to assign the troops to agents in the battle handler
+        public Dictionary<string, List<CustomTroopInfo>> GetTroopsToAssign() {
+            return new Dictionary<string, List<CustomTroopInfo>>(_troopNameMapping);
         }
 
         public void PrintDebug() {
@@ -175,6 +180,11 @@ namespace CustomTroopNames {
                 });
         }
 
+        public Dictionary<string, List<CustomTroopInfo>> GetTroopsToAssign() {
+            return _troopManager.GetTroopsToAssign();
+        }
+
+
         public void PrintDebug() {
             _troopManager.PrintDebug();
         }
@@ -185,18 +195,36 @@ namespace CustomTroopNames {
     }
 
     public class RenameTroopsBehavior : MissionLogic {
-        public override void OnAgentCreated(Agent agent) {
-            base.OnAgentCreated(agent);
-            if (!agent.IsHuman) return;
+        private Dictionary<string, List<CustomTroopInfo>> _troopsToAssign;
+        public override void OnBehaviourInitialize() {
+            base.OnBehaviourInitialize();
+            var customTroopsBehavior = Campaign.Current
+                ?.GetCampaignBehavior<CustomTroopNamesCampaignBehavior>();
+            if (customTroopsBehavior == null) return;
+            _troopsToAssign = customTroopsBehavior.GetTroopsToAssign();
+        }
 
+        public override void OnAgentBuild(Agent agent, Banner banner) {
+            base.OnAgentBuild(agent, banner);
+            if (
+                // Ignore non-humans...
+                !agent.IsHuman ||
+                // enemy soldiers...
+                agent.Team != Mission.PlayerTeam
+                // and the player
+                || agent.IsPlayerControlled)
+                return;
+
+            RenameAgent(agent, agent.Name + " " + agent.Index);
+        }
+
+        private static void RenameAgent(Agent agent, string customName) {
             var originalName = agent.Character.Name;
-            agent.Character.Name =
-                new TextObject(agent.Name + " " + agent.Index.ToString());
+            agent.Character.Name = new TextObject(customName);
             // Reapply the setter logic that copies the name from the character object
             agent.Character = agent.Character;
             agent.Character.Name = originalName;
-
-            Debug.WriteLine(agent.Name);
         }
+
     }
 }
