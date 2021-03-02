@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
+using System.Linq;
+using Debug = System.Diagnostics.Debug;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.InputSystem;
+using TaleWorlds.Library;
 using TaleWorlds.Localization;
 using TaleWorlds.MountAndBlade;
 using TaleWorlds.SaveSystem;
@@ -43,7 +45,8 @@ namespace CustomTroopNames {
 
         protected override void DefineContainerDefinitions() {
             ConstructContainerDefinition(typeof(List<CustomTroopInfo>));
-            ConstructContainerDefinition(typeof(Dictionary<string, List<CustomTroopInfo>>));
+            ConstructContainerDefinition(
+                typeof(Dictionary<string, List<CustomTroopInfo>>));
         }
     }
 
@@ -51,6 +54,7 @@ namespace CustomTroopNames {
         public CustomTroopInfo(string name) {
             Name = name;
         }
+
         [SaveableField(1)] public string Name;
 
         [SaveableField(2)] public int Kills = 0;
@@ -89,7 +93,7 @@ namespace CustomTroopNames {
 
         // Clones the _troopNameMapping dictionary into a new one that will be mutated in order to assign the troops to agents in the battle handler
         public Dictionary<string, List<CustomTroopInfo>> GetTroopsToAssign() {
-            return new Dictionary<string, List<CustomTroopInfo>>(_troopNameMapping);
+            return _troopNameMapping.ToDictionary(pair => pair.Key, pair => new List<CustomTroopInfo>(pair.Value));
         }
 
         public void PrintDebug() {
@@ -173,7 +177,7 @@ namespace CustomTroopNames {
                 });
             CampaignEvents.PlayerUpgradedTroopsEvent.AddNonSerializedListener(this,
                 (unit, newUnit, howMany) => {
-                    for(var i=0; i<howMany; i++) {
+                    for (var i = 0; i < howMany; i++) {
                         _troopManager.TroopUpgraded(unit, newUnit);
                         Debug.WriteLine($"{unit.Name} digivolved to ${newUnit.Name}");
                     }
@@ -194,14 +198,26 @@ namespace CustomTroopNames {
         }
     }
 
+    public class CustomNameAgentComponent : AgentComponent {
+        public CustomTroopInfo TroopInfo;
+
+        public CustomNameAgentComponent(Agent agent, CustomTroopInfo troopInfo) :
+            base(agent) {
+            this.TroopInfo = troopInfo;
+        }
+    }
+
     public class RenameTroopsBehavior : MissionLogic {
         private Dictionary<string, List<CustomTroopInfo>> _troopsToAssign;
-        public override void OnBehaviourInitialize() {
-            base.OnBehaviourInitialize();
+
+        public override void EarlyStart() {
+            base.EarlyStart();
             var customTroopsBehavior = Campaign.Current
                 ?.GetCampaignBehavior<CustomTroopNamesCampaignBehavior>();
-            if (customTroopsBehavior == null) return;
-            _troopsToAssign = customTroopsBehavior.GetTroopsToAssign();
+
+            // TODO: pass in customTroopBehavior when creating MissionLogic?  (Only apply when appropriate)
+            _troopsToAssign = customTroopsBehavior?
+                .GetTroopsToAssign() ?? new Dictionary<string, List<CustomTroopInfo>>();
         }
 
         public override void OnAgentBuild(Agent agent, Banner banner) {
@@ -215,7 +231,14 @@ namespace CustomTroopNames {
                 || agent.IsPlayerControlled)
                 return;
 
-            RenameAgent(agent, agent.Name + " " + agent.Index);
+            if (
+                !_troopsToAssign.TryGetValue(agent.Character.Name.ToString(),
+                    out var troops)
+                || troops.Count == 0
+            ) return;
+            agent.AddComponent(new CustomNameAgentComponent(agent, troops[0]));
+            RenameAgent(agent, troops[0].Name);
+            troops.RemoveAt(0);
         }
 
         private static void RenameAgent(Agent agent, string customName) {
@@ -225,6 +248,5 @@ namespace CustomTroopNames {
             agent.Character = agent.Character;
             agent.Character.Name = originalName;
         }
-
     }
 }
