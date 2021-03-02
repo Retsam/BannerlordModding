@@ -100,8 +100,10 @@ namespace CustomTroopNames {
             foreach (var pair in _troopNameMapping) {
                 var troopName = pair.Key;
                 foreach (var troopInfo in pair.Value) {
+                    var killInfo = troopInfo.Kills == 0 ? "" :
+                        troopInfo.Kills == 1 ? "(1 Kill)" : $"({troopInfo.Kills} Kills)";
                     InformationManager.DisplayMessage(new InformationMessage
-                        ($"{troopName} {troopInfo.Name}"));
+                        ($"{troopName} {troopInfo.Name} {killInfo}"));
                 }
             }
         }
@@ -239,6 +241,41 @@ namespace CustomTroopNames {
             agent.AddComponent(new CustomNameAgentComponent(agent, troops[0]));
             RenameAgent(agent, troops[0].Name);
             troops.RemoveAt(0);
+        }
+
+        public override void OnAgentRemoved(Agent affectedAgent, Agent affectorAgent,
+            AgentState agentState,
+            KillingBlow blow) {
+            base.OnAgentRemoved(affectedAgent, affectorAgent, agentState, blow);
+            var affectorTroopInfo = affectorAgent
+                ?.GetComponent<CustomNameAgentComponent>()?.TroopInfo;
+            if (affectorTroopInfo != null) {
+                affectorTroopInfo.Kills += 1;
+                if (agentState == AgentState.Killed) {
+                    InformationManager.DisplayMessage(
+                        new InformationMessage(
+                            $"{affectorAgent.Name} killed {affectedAgent.Name}"));
+                }
+                else if (agentState == AgentState.Unconscious) {
+                    InformationManager.DisplayMessage(
+                        new InformationMessage(
+                            $"{affectorAgent.Name} knocked out {affectedAgent.Name}"));
+                }
+                else {
+                    Debug.WriteLine($"Unexpected state {agentState}");
+                    InformationManager.DisplayMessage(
+                        new InformationMessage(
+                            $"{affectorAgent.Name} did something to {affectedAgent.Name}"));
+                }
+            }
+
+            if (agentState != AgentState.Killed) return;
+
+            var affectedTroopInfo = affectedAgent
+                ?.GetComponent<CustomNameAgentComponent>()?.TroopInfo;
+            if (affectedTroopInfo == null) return;
+            InformationManager.DisplayMessage(
+                new InformationMessage($"{affectedAgent.Name} DIES", Colors.Red));
         }
 
         private static void RenameAgent(Agent agent, string customName) {
