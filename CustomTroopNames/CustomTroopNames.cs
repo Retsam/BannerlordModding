@@ -22,8 +22,9 @@ namespace CustomTroopNames {
         protected override void OnApplicationTick(float dt) {
             base.OnApplicationTick(dt);
             if (Input.IsKeyPressed(InputKey.Tilde)) {
-                Campaign.Current?.GetCampaignBehavior<CustomTroopNamesCampaignBehavior>()
-                    ?.PrintDebug();
+                Campaign.Current
+                    ?.GetCampaignBehavior<CustomTroopNamesCampaignBehavior>()
+                    ?.PrintDebug(Input.IsKeyDown(InputKey.RightShift));
             }
         }
 
@@ -41,12 +42,14 @@ namespace CustomTroopNames {
 
         protected override void DefineClassTypes() {
             AddClassDefinition(typeof(CustomTroopInfo), 1);
+            AddClassDefinition(typeof(DeadTroopInfo), 2);
         }
 
         protected override void DefineContainerDefinitions() {
             ConstructContainerDefinition(typeof(List<CustomTroopInfo>));
             ConstructContainerDefinition(
                 typeof(Dictionary<string, List<CustomTroopInfo>>));
+            ConstructContainerDefinition(typeof(List<DeadTroopInfo>));
         }
     }
 
@@ -55,14 +58,30 @@ namespace CustomTroopNames {
             Name = name;
         }
 
-        [SaveableField(1)] public string Name;
+        [SaveableField(1)] public readonly string Name;
 
         [SaveableField(2)] public int Kills = 0;
+    }
+
+    public class DeadTroopInfo {
+        public DeadTroopInfo(CustomTroopInfo info, string troopType) {
+            Info = info;
+            TroopType = troopType;
+        }
+        [SaveableField(1)] public readonly CustomTroopInfo Info;
+
+        // Type of troop, at time of death
+        [SaveableField(2)] public readonly string TroopType;
+
+
     }
 
     public class CustomTroopNameManager {
         private Dictionary<string, List<CustomTroopInfo>> _troopNameMapping =
             new Dictionary<string, List<CustomTroopInfo>>();
+
+        private List<DeadTroopInfo> _troopGraveyard =
+            new List<DeadTroopInfo>();
 
         public void TroopRecruited(CharacterObject unit, string customName) {
             AddTroop(unit, new CustomTroopInfo(customName));
@@ -79,7 +98,8 @@ namespace CustomTroopNames {
         }
 
         public void TroopUpgraded(CharacterObject oldType, CharacterObject newType) {
-            if (!_troopNameMapping.TryGetValue(oldType.Name.ToString(), out var troops)) {
+            if (!_troopNameMapping.TryGetValue(oldType.Name.ToString(), out var troops)
+                || troops.Count == 0) {
                 return;
             }
 
@@ -91,31 +111,53 @@ namespace CustomTroopNames {
                 ($"{troopInfo.Name} has been promoted to {newType.Name}")));
         }
 
-        // Clones the _troopNameMapping dictionary into a new one that will be mutated in order to assign the troops to agents in the battle handler
-        public Dictionary<string, List<CustomTroopInfo>> GetTroopsToAssign() {
-            return _troopNameMapping.ToDictionary(pair => pair.Key, pair => new List<CustomTroopInfo>(pair.Value));
+        public void TroopDied(BasicCharacterObject type, CustomTroopInfo troopInfo) {
+            _troopNameMapping.TryGetValue(type.Name.ToString(), out var troops);
+            if (troops == null || !troops.Remove(troopInfo)) {
+                Debug.WriteLine(
+                    $"ERROR - didn't find {type.Name} to mark {troopInfo.Name} as dead");
+            }
+            _troopGraveyard.Add(new DeadTroopInfo(troopInfo, type.Name.ToString()));
         }
 
-        public void PrintDebug() {
-            foreach (var pair in _troopNameMapping) {
-                var troopName = pair.Key;
-                foreach (var troopInfo in pair.Value) {
-                    var killInfo = troopInfo.Kills == 0 ? "" :
-                        troopInfo.Kills == 1 ? "(1 Kill)" : $"({troopInfo.Kills} Kills)";
-                    InformationManager.DisplayMessage(new InformationMessage
-                        ($"{troopName} {troopInfo.Name} {killInfo}"));
+        // Clones the _troopNameMapping dictionary into a new one that will be mutated in order to assign the troops to agents in the battle handler
+        public Dictionary<string, List<CustomTroopInfo>> GetTroopsToAssign() {
+            return _troopNameMapping.ToDictionary(pair => pair.Key,
+                pair => new List<CustomTroopInfo>(pair.Value));
+        }
+
+        public void PrintDebug(bool showGrave) {
+            if (showGrave) {
+                foreach (var deadTroop in _troopGraveyard) {
+                    InformationManager.DisplayMessage(new InformationMessage(
+                        $"{deadTroop.Info.Name} - dead {deadTroop.TroopType} with {deadTroop.Info.Kills} kills"));
+                }
+            }
+            else {
+                foreach (var pair in _troopNameMapping) {
+                    var troopName = pair.Key;
+                    foreach (var troopInfo in pair.Value) {
+                        var killInfo = troopInfo.Kills == 0 ? "" :
+                            troopInfo.Kills == 1 ? "(1 Kill)" :
+                            $"({troopInfo.Kills} Kills)";
+                        InformationManager.DisplayMessage(new InformationMessage
+                            ($"{troopName} {troopInfo.Name} {killInfo}"));
+                    }
                 }
             }
         }
 
         public void SyncData(IDataStore dataStore) {
             dataStore.SyncData("_troopNameMapping", ref _troopNameMapping);
+            dataStore.SyncData("_troopGraveyard", ref _troopGraveyard);
         }
     }
 
     public class CustomTroopNamesCampaignBehavior : CampaignBehaviorBase {
         private readonly CustomTroopNameManager _troopManager =
             new CustomTroopNameManager();
+
+        public CustomTroopNameManager TroopManager => _troopManager;
 
         private List<CharacterObject> _textPromptsToShow = new List<CharacterObject>();
         private Task _flushTextPromptsTask;
@@ -184,6 +226,7 @@ namespace CustomTroopNames {
                         Debug.WriteLine($"{unit.Name} digivolved to ${newUnit.Name}");
                     }
                 });
+
         }
 
         public Dictionary<string, List<CustomTroopInfo>> GetTroopsToAssign() {
@@ -191,8 +234,8 @@ namespace CustomTroopNames {
         }
 
 
-        public void PrintDebug() {
-            _troopManager.PrintDebug();
+        public void PrintDebug(bool showGrave) {
+            _troopManager.PrintDebug(showGrave);
         }
 
         public override void SyncData(IDataStore dataStore) {
@@ -201,7 +244,7 @@ namespace CustomTroopNames {
     }
 
     public class CustomNameAgentComponent : AgentComponent {
-        public CustomTroopInfo TroopInfo;
+        public readonly CustomTroopInfo TroopInfo;
 
         public CustomNameAgentComponent(Agent agent, CustomTroopInfo troopInfo) :
             base(agent) {
@@ -273,9 +316,13 @@ namespace CustomTroopNames {
 
             var affectedTroopInfo = affectedAgent
                 ?.GetComponent<CustomNameAgentComponent>()?.TroopInfo;
-            if (affectedTroopInfo == null) return;
+            var customTroopsBehavior = Campaign.Current
+                ?.GetCampaignBehavior<CustomTroopNamesCampaignBehavior>();
+            if (affectedTroopInfo == null || customTroopsBehavior == null) return;
+
             InformationManager.DisplayMessage(
                 new InformationMessage($"{affectedAgent.Name} DIES", Colors.Red));
+            customTroopsBehavior.TroopManager.TroopDied(affectedAgent.Character, affectedTroopInfo);
         }
 
         private static void RenameAgent(Agent agent, string customName) {
