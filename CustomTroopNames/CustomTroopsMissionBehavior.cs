@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using SandBox.ViewModelCollection;
 using TaleWorlds.Core;
 using TaleWorlds.Core.ViewModelCollection;
-using TaleWorlds.Library;
 using TaleWorlds.Localization;
 using TaleWorlds.MountAndBlade;
 using Debug = System.Diagnostics.Debug;
@@ -26,7 +25,8 @@ namespace CustomTroopNames {
             base.ShowBattleResults();
             if (!(Mission.GetMissionBehaviour<BattleObserverMissionLogic>()?
                 .BattleObserver is SPScoreboardVM scoreboard)) return;
-            scoreboard.BattleResults.Add(new BattleResultVM("TEST RESULT!", () => new List<TooltipProperty>()));
+            scoreboard.BattleResults.Add(new BattleResultVM("TEST RESULT!",
+                () => new List<TooltipProperty>()));
         }
 
         public override void OnAgentBuild(Agent agent, Banner banner) {
@@ -61,18 +61,21 @@ namespace CustomTroopNames {
                 if (agentState == AgentState.Killed) {
                     InformationManager.DisplayMessage(
                         new InformationMessage(
-                            $"{affectorAgent.Name} killed {affectedAgent.Name}"));
+                            $"{affectorAgent.Name} killed {affectedAgent.Name}",
+                            ModColors.MainColor));
                 }
                 else if (agentState == AgentState.Unconscious) {
                     InformationManager.DisplayMessage(
                         new InformationMessage(
-                            $"{affectorAgent.Name} knocked out {affectedAgent.Name}"));
+                            $"{affectorAgent.Name} knocked out {affectedAgent.Name}",
+                            ModColors.MainColor));
                 }
                 else {
                     Debug.WriteLine($"Unexpected state {agentState}");
                     InformationManager.DisplayMessage(
                         new InformationMessage(
-                            $"{affectorAgent.Name} did something to {affectedAgent.Name}"));
+                            $"{affectorAgent.Name} did something to {affectedAgent.Name}",
+                            ModColors.AlertColor));
                 }
             }
 
@@ -84,7 +87,8 @@ namespace CustomTroopNames {
 
             _nameManager.TroopDied(affectedAgent.Character, affectedTroopInfo);
             InformationManager.DisplayMessage(
-                new InformationMessage($"{affectedAgent.Name} DIES", Colors.Red));
+                new InformationMessage($"{affectedAgent.Name} DIES",
+                    ModColors.AlertColor));
         }
 
         private static void RenameAgent(Agent agent, string customName) {

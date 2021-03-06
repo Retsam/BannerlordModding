@@ -6,10 +6,16 @@ using JetBrains.Annotations;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.InputSystem;
+using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 using TaleWorlds.SaveSystem;
 
 namespace CustomTroopNames {
+    internal static class ModColors {
+        public static Color MainColor = new Color(0, .8f, 1);
+        public static Color AlertColor = Colors.Red;
+    }
+
     [UsedImplicitly]
     public class CustomTroopsSubModule : MBSubModuleBase {
         public override void OnMissionBehaviourInitialize(Mission mission) {
@@ -109,7 +115,8 @@ namespace CustomTroopNames {
 
             AddTroop(newType, troopInfo);
             InformationManager.DisplayMessage(new InformationMessage(
-                ($"{troopInfo.Name} has been promoted to {newType.Name}")));
+                ($"{troopInfo.Name} has been promoted to {newType.Name}"),
+                ModColors.MainColor));
         }
 
         public void TroopDied(BasicCharacterObject type, CustomTroopInfo troopInfo) {
@@ -132,7 +139,8 @@ namespace CustomTroopNames {
             if (showGrave) {
                 foreach (var deadTroop in _troopGraveyard) {
                     InformationManager.DisplayMessage(new InformationMessage(
-                        $"{deadTroop.Info.Name} - dead {deadTroop.TroopType} with {deadTroop.Info.Kills} kills"));
+                        $"{deadTroop.Info.Name} - dead {deadTroop.TroopType} with {deadTroop.Info.Kills} kills",
+                        ModColors.AlertColor));
                 }
             }
             else {
@@ -143,7 +151,8 @@ namespace CustomTroopNames {
                             troopInfo.Kills == 1 ? "(1 Kill)" :
                             $"({troopInfo.Kills} Kills)";
                         InformationManager.DisplayMessage(new InformationMessage
-                            ($"{troopName} {troopInfo.Name} {killInfo}"));
+                        ($"{troopName} {troopInfo.Name} {killInfo}",
+                            ModColors.MainColor));
                     }
                 }
             }
