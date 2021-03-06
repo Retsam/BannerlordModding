@@ -201,6 +201,7 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="CustomTroopNames.cs" />
+        <Compile Include="CustomTroopsMissionBehavior.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
