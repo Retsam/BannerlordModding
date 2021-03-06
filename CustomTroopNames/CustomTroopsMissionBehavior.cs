@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
 using TaleWorlds.Localization;
@@ -8,16 +7,16 @@ using Debug = System.Diagnostics.Debug;
 
 namespace CustomTroopNames {
     public class CustomTroopsMissionBehavior : MissionLogic {
+        public CustomTroopsMissionBehavior(CustomTroopNameManager nameManager) {
+            _nameManager = nameManager;
+        }
+
+        private readonly CustomTroopNameManager _nameManager;
         private Dictionary<string, List<CustomTroopInfo>> _troopsToAssign;
 
         public override void EarlyStart() {
             base.EarlyStart();
-            var customTroopsBehavior = Campaign.Current
-                ?.GetCampaignBehavior<CustomTroopNamesCampaignBehavior>();
-
-            // TODO: pass in customTroopBehavior when creating MissionLogic?  (Only apply when appropriate)
-            _troopsToAssign = customTroopsBehavior?
-                .GetTroopsToAssign() ?? new Dictionary<string, List<CustomTroopInfo>>();
+            _troopsToAssign = _nameManager.GetTroopsToAssign();
         }
 
         public override void OnAgentBuild(Agent agent, Banner banner) {
@@ -71,13 +70,11 @@ namespace CustomTroopNames {
 
             var affectedTroopInfo = affectedAgent
                 ?.GetComponent<CustomNameAgentComponent>()?.TroopInfo;
-            var customTroopsBehavior = Campaign.Current
-                ?.GetCampaignBehavior<CustomTroopNamesCampaignBehavior>();
-            if (affectedTroopInfo == null || customTroopsBehavior == null) return;
+            if (affectedTroopInfo == null) return;
 
+            _nameManager.TroopDied(affectedAgent.Character, affectedTroopInfo);
             InformationManager.DisplayMessage(
                 new InformationMessage($"{affectedAgent.Name} DIES", Colors.Red));
-            customTroopsBehavior.TroopManager.TroopDied(affectedAgent.Character, affectedTroopInfo);
         }
 
         private static void RenameAgent(Agent agent, string customName) {

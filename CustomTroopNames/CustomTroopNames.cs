@@ -14,7 +14,11 @@ namespace CustomTroopNames {
     public class CustomTroopsSubModule : MBSubModuleBase {
         public override void OnMissionBehaviourInitialize(Mission mission) {
             base.OnMissionBehaviourInitialize(mission);
-            mission.AddMissionBehaviour(new CustomTroopsMissionBehavior());
+            var customTroopsBehavior = Campaign.Current
+                ?.GetCampaignBehavior<CustomTroopNamesCampaignBehavior>();
+            if (customTroopsBehavior == null) return;
+            mission.AddMissionBehaviour(
+                new CustomTroopsMissionBehavior(customTroopsBehavior.TroopManager));
         }
 
         protected override void OnApplicationTick(float dt) {
@@ -22,7 +26,7 @@ namespace CustomTroopNames {
             if (Input.IsKeyPressed(InputKey.Tilde)) {
                 Campaign.Current
                     ?.GetCampaignBehavior<CustomTroopNamesCampaignBehavior>()
-                    ?.PrintDebug(Input.IsKeyDown(InputKey.RightShift));
+                    ?.TroopManager.PrintDebug(Input.IsKeyDown(InputKey.RightShift));
             }
         }
 
@@ -66,12 +70,11 @@ namespace CustomTroopNames {
             Info = info;
             TroopType = troopType;
         }
+
         [SaveableField(1)] public readonly CustomTroopInfo Info;
 
         // Type of troop, at time of death
         [SaveableField(2)] public readonly string TroopType;
-
-
     }
 
     public class CustomTroopNameManager {
@@ -115,6 +118,7 @@ namespace CustomTroopNames {
                 Debug.WriteLine(
                     $"ERROR - didn't find {type.Name} to mark {troopInfo.Name} as dead");
             }
+
             _troopGraveyard.Add(new DeadTroopInfo(troopInfo, type.Name.ToString()));
         }
 
@@ -152,10 +156,8 @@ namespace CustomTroopNames {
     }
 
     public class CustomTroopNamesCampaignBehavior : CampaignBehaviorBase {
-        private readonly CustomTroopNameManager _troopManager =
+        public CustomTroopNameManager TroopManager { get; } =
             new CustomTroopNameManager();
-
-        public CustomTroopNameManager TroopManager => _troopManager;
 
         private List<CharacterObject> _textPromptsToShow = new List<CharacterObject>();
         private Task _flushTextPromptsTask;
@@ -171,7 +173,7 @@ namespace CustomTroopNames {
                     true, false, "Set Name", "Don't name",
                     customName => {
                         if (customName.Length > 0) {
-                            _troopManager.TroopRecruited(unit, customName);
+                            TroopManager.TroopRecruited(unit, customName);
                         }
                         else {
                             doneNaming = true;
@@ -220,24 +222,14 @@ namespace CustomTroopNames {
             CampaignEvents.PlayerUpgradedTroopsEvent.AddNonSerializedListener(this,
                 (unit, newUnit, howMany) => {
                     for (var i = 0; i < howMany; i++) {
-                        _troopManager.TroopUpgraded(unit, newUnit);
+                        TroopManager.TroopUpgraded(unit, newUnit);
                         Debug.WriteLine($"{unit.Name} digivolved to ${newUnit.Name}");
                     }
                 });
-
-        }
-
-        public Dictionary<string, List<CustomTroopInfo>> GetTroopsToAssign() {
-            return _troopManager.GetTroopsToAssign();
-        }
-
-
-        public void PrintDebug(bool showGrave) {
-            _troopManager.PrintDebug(showGrave);
         }
 
         public override void SyncData(IDataStore dataStore) {
-            _troopManager.SyncData(dataStore);
+            TroopManager.SyncData(dataStore);
         }
     }
 
