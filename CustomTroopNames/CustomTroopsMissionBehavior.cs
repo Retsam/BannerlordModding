@@ -1,7 +1,5 @@
 using System.Collections.Generic;
-using SandBox.ViewModelCollection;
 using TaleWorlds.Core;
-using TaleWorlds.Core.ViewModelCollection;
 using TaleWorlds.Localization;
 using TaleWorlds.MountAndBlade;
 using Debug = System.Diagnostics.Debug;
@@ -18,15 +16,6 @@ namespace CustomTroopNames {
         public override void EarlyStart() {
             base.EarlyStart();
             _troopsToAssign = _nameManager.GetTroopsToAssign();
-        }
-
-
-        public override void ShowBattleResults() {
-            base.ShowBattleResults();
-            if (!(Mission.GetMissionBehaviour<BattleObserverMissionLogic>()?
-                .BattleObserver is SPScoreboardVM scoreboard)) return;
-            scoreboard.BattleResults.Add(new BattleResultVM("TEST RESULT!",
-                () => new List<TooltipProperty>()));
         }
 
         public override void OnAgentBuild(Agent agent, Banner banner) {

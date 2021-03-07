@@ -25,6 +25,7 @@ namespace CustomTroopNames {
             if (customTroopsBehavior == null) return;
             mission.AddMissionBehaviour(
                 new CustomTroopsMissionBehavior(customTroopsBehavior.TroopManager));
+            mission.AddMissionBehaviour(new HighlightsMissionBehavior());
         }
 
         protected override void OnApplicationTick(float dt) {
