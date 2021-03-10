@@ -75,9 +75,6 @@ namespace CustomTroopNames {
             if (affectedTroopInfo == null) return;
 
             _nameManager.TroopDied(affectedAgent.Character, affectedTroopInfo);
-            InformationManager.DisplayMessage(
-                new InformationMessage($"{affectedAgent.Name} DIES",
-                    ModColors.AlertColor));
         }
 
         private static void RenameAgent(Agent agent, string customName) {

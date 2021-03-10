@@ -3,12 +3,15 @@ using System.Linq;
 using Debug = System.Diagnostics.Debug;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using SandBox.GauntletUI;
+using SandBox.View.Map;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.InputSystem;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 using TaleWorlds.SaveSystem;
+using TaleWorlds.MountAndBlade.View.Missions;
 
 namespace CustomTroopNames {
     internal static class ModColors {
@@ -128,6 +131,17 @@ namespace CustomTroopNames {
             }
 
             _troopGraveyard.Add(new DeadTroopInfo(troopInfo, type.Name.ToString()));
+
+            InformationManager.DisplayMessage(
+                new InformationMessage($"{troopInfo.Name} DIES",
+                    ModColors.AlertColor));
+        }
+
+        public void AnonymousTroopDied(BasicCharacterObject type) {
+            _troopNameMapping.TryGetValue(type.Name.ToString(), out var troops);
+            if (troops == null || troops.Count == 0) return;
+            // TODO determine randomly based on total number of troops of this class
+            TroopDied(type, troops[0]);
         }
 
         // Clones the _troopNameMapping dictionary into a new one that will be mutated in order to assign the troops to agents in the battle handler
@@ -249,6 +263,66 @@ namespace CustomTroopNames {
         public CustomNameAgentComponent(Agent agent, CustomTroopInfo troopInfo) :
             base(agent) {
             this.TroopInfo = troopInfo;
+        }
+    }
+
+    [UsedImplicitly]
+    [OverrideView(typeof(BattleSimulationMapView))]
+    public class CustomTroopBattleSimulationGauntletView : BattleSimulationGauntletView {
+        private readonly BattleSimulation _battleSimulation;
+
+        public CustomTroopBattleSimulationGauntletView(BattleSimulation battleSimulation)
+            : base(battleSimulation) {
+            _battleSimulation = battleSimulation;
+        }
+
+        protected override void CreateLayout() {
+            base.CreateLayout();
+            var customNameManager =
+                Campaign.Current?.GetCampaignBehavior<CustomTroopNamesCampaignBehavior>()
+                    ?.TroopManager;
+            if (customNameManager == null) return;
+            // Wrap the BattleObserver here, after it's been set by SPScoreboardVM.Initialize
+            _battleSimulation.BattleObserver =
+                new BattleObserverWrapper(_battleSimulation.BattleObserver,
+                    customNameManager);
+        }
+    }
+
+    public class BattleObserverWrapper : IBattleObserver {
+        private readonly IBattleObserver _wrappedObserver;
+        private readonly CustomTroopNameManager _customTroopNameManager;
+
+        public BattleObserverWrapper(IBattleObserver wrappedObserver,
+            CustomTroopNameManager customTroopNameManager) {
+            _wrappedObserver = wrappedObserver;
+            _customTroopNameManager = customTroopNameManager;
+        }
+
+        public void TroopNumberChanged(BattleSideEnum side,
+            IBattleCombatant battleCombatant,
+            BasicCharacterObject character, int number = 0, int numberKilled = 0,
+            int numberWounded = 0, int numberRouted = 0, int killCount = 0,
+            int numberReadyToUpgrade = 0) {
+            _wrappedObserver.TroopNumberChanged(side, battleCombatant, character, number,
+                numberKilled, numberWounded, numberRouted, killCount,
+                numberReadyToUpgrade);
+
+            if (battleCombatant != PartyBase.MainParty) return;
+            for (var _ = 0; _ < numberKilled; _++) {
+                _customTroopNameManager.AnonymousTroopDied(character);
+            }
+        }
+
+        public void HeroSkillIncreased(BattleSideEnum side,
+            IBattleCombatant battleCombatant,
+            BasicCharacterObject heroCharacter, SkillObject skill) {
+            _wrappedObserver.HeroSkillIncreased(side, battleCombatant, heroCharacter,
+                skill);
+        }
+
+        public void BattleResultsReady() {
+            _wrappedObserver.BattleResultsReady();
         }
     }
 }
