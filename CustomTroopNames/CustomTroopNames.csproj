@@ -215,9 +215,11 @@
         </Reference>
     </ItemGroup>
     <ItemGroup>
+        <Compile Include="CustomTroopNameManager.cs" />
         <Compile Include="CustomTroopNames.cs" />
         <Compile Include="CustomTroopsMissionBehavior.cs" />
         <Compile Include="HighlightsMissionBehavior.cs" />
+        <Compile Include="Models.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
