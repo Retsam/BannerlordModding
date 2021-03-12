@@ -7,11 +7,19 @@ using TaleWorlds.InputSystem;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 using TaleWorlds.MountAndBlade.View.Missions;
+using Debug = System.Diagnostics.Debug;
 
 namespace CustomTroopNames {
     internal static class ModColors {
         public static Color MainColor = new Color(0, .8f, 1);
         public static Color AlertColor = Colors.Red;
+        public static void InfoMessage(string text) {
+            InformationManager.DisplayMessage(new InformationMessage(text, MainColor));
+        }
+
+        public static void AlertMessage(string text) {
+            InformationManager.DisplayMessage(new InformationMessage(text, AlertColor));
+        }
     }
 
     [UsedImplicitly]
@@ -42,7 +50,6 @@ namespace CustomTroopNames {
                     ?.TroopManager.PrintDebug(Input.IsKeyDown(InputKey.RightShift));
             }
         }
-
     }
 
     public class CustomTroopNamesCampaignBehavior : CampaignBehaviorBase {
@@ -60,6 +67,16 @@ namespace CustomTroopNames {
                 (unit, newUnit, howMany) => {
                     for (var i = 0; i < howMany; i++) {
                         TroopManager.TroopUpgraded(unit, newUnit);
+                    }
+                });
+            CampaignEvents.OnTroopsDesertedEvent.AddNonSerializedListener(this,
+                (party, deserters) => {
+                    if (party != MobileParty.MainParty) return;
+                    var rosterBeforeDesertion = TroopRoster.CreateDummyTroopRoster();
+                    rosterBeforeDesertion.Add(party.MemberRoster);
+                    rosterBeforeDesertion.Add(deserters);
+                    foreach(var troop in deserters.ToFlattenedRoster()) {
+                        TroopManager.TroopDeserted(troop.Troop, rosterBeforeDesertion);
                     }
                 });
         }

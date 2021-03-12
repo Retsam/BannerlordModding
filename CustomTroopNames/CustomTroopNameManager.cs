@@ -16,6 +16,8 @@ namespace CustomTroopNames {
 
         private readonly RecruitTroopInquiryManager _recruitTroopInquiryManager;
 
+        private static readonly Random Rnd = new Random();
+
         public CustomTroopNameManager() {
             _recruitTroopInquiryManager = new RecruitTroopInquiryManager((unit, name) =>
                 AddTroop(unit, new CustomTroopInfo(name)));
@@ -50,6 +52,19 @@ namespace CustomTroopNames {
                 ModColors.MainColor));
         }
 
+        private CustomTroopInfo RemoveRandomTroopIfNecessary(CharacterObject type, TroopRoster roster) {
+            _troopNameMapping.TryGetValue(type.Name.ToString(), out var troops);
+            if (
+                troops == null
+                || troops.Count == 0
+                || roster.GetTroopCount(type) > troops.Count) return null;
+
+            var removeIdx = Rnd.Next(troops.Count);
+            var removed = troops[removeIdx];
+            troops.RemoveAt(removeIdx);
+            return removed;
+        }
+
         public void TroopDied(BasicCharacterObject type, CustomTroopInfo troopInfo) {
             _troopNameMapping.TryGetValue(type.Name.ToString(), out var troops);
             if (troops == null || !troops.Remove(troopInfo)) {
@@ -69,6 +84,16 @@ namespace CustomTroopNames {
             if (troops == null || troops.Count == 0) return;
             // TODO determine randomly based on total number of troops of this class
             TroopDied(type, troops[0]);
+        }
+
+        public void TroopDeserted(CharacterObject type, TroopRoster rosterBeforeDesertion) {
+            var deserted = RemoveRandomTroopIfNecessary(type, rosterBeforeDesertion);
+            if (deserted == null) return;
+            // Adjust the roster in case multiple desertions happen simultaneously
+            rosterBeforeDesertion.AddToCounts(type, -1);
+
+            ModColors.AlertMessage($"{deserted.Name} has deserted!");
+            _troopGraveyard.Add(new DeadTroopInfo(deserted, type.Name.ToString()));
         }
 
         // Clones the _troopNameMapping dictionary into a new one that will be mutated in order to assign the troops to agents in the battle handler
