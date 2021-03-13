@@ -79,6 +79,9 @@ namespace CustomTroopNames {
                         TroopManager.TroopDeserted(troop.Troop, rosterBeforeDesertion);
                     }
                 });
+            CampaignEvents.HourlyTickEvent.AddNonSerializedListener(this, () => {
+                TroopManager.CheckValid();
+            });
         }
 
         public override void SyncData(IDataStore dataStore) {

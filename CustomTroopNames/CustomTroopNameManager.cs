@@ -102,6 +102,32 @@ namespace CustomTroopNames {
                 pair => new List<CustomTroopInfo>(pair.Value));
         }
 
+        // Ensure we don't have more named troops than actual troops
+        public void CheckValid() {
+            var roster = PartyBase.MainParty.MemberRoster;
+            foreach (var pair in _troopNameMapping) {
+                var troopName = pair.Key;
+                var namedTroops = pair.Value;
+                if (namedTroops.Count == 0) continue;
+
+                var troopCount = 0;
+                for (var i = 0; i < roster.Count; i++) {
+                    var character = roster.GetCharacterAtIndex(i);
+                    if (character.Name.ToString() != troopName) continue;
+                    troopCount = roster.GetTroopCount(character);
+                    break;
+                }
+
+                while (namedTroops.Count > troopCount) {
+                    var troop = namedTroops[0];
+                    ModColors.AlertMessage($"{troop.Name} vanishes in a puff of logic.");
+                    _troopGraveyard.Add(new DeadTroopInfo(troop, troopName));
+                    namedTroops.RemoveAt(0);
+                }
+            }
+        }
+
+
         public void PrintDebug(bool showGrave) {
             if (showGrave) {
                 foreach (var deadTroop in _troopGraveyard) {
