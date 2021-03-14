@@ -48,7 +48,7 @@ namespace CustomTroopNames {
             if (data.Died) {
                 return data.Kills > 0
                     ? $"{troopName} died after inflicting {data.Kills} casualties"
-                    : $"${troopName} died.";
+                    : $"{troopName} died.";
             }
 
             return data.Kills >= 5

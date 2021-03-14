@@ -4,15 +4,18 @@ using TaleWorlds.SaveSystem;
 
 namespace CustomTroopNames {
     public class DeadTroopInfo {
-        public DeadTroopInfo(CustomTroopInfo info, string troopType) {
+        public DeadTroopInfo(CustomTroopInfo info, string troopType, string causeOfDeath) {
             Info = info;
             TroopType = troopType;
+            CauseOfDeath = causeOfDeath;
         }
 
         [SaveableField(1)] public readonly CustomTroopInfo Info;
 
         // Type of troop, at time of death
         [SaveableField(2)] public readonly string TroopType;
+
+        [SaveableField(3)] public readonly string CauseOfDeath;
     }
 
     public class CustomTroopInfo {

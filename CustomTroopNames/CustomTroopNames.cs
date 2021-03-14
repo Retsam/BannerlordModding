@@ -7,7 +7,6 @@ using TaleWorlds.InputSystem;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 using TaleWorlds.MountAndBlade.View.Missions;
-using Debug = System.Diagnostics.Debug;
 
 namespace CustomTroopNames {
     internal static class ModColors {
@@ -141,8 +140,15 @@ namespace CustomTroopNames {
                 numberReadyToUpgrade);
 
             if (battleCombatant != PartyBase.MainParty) return;
+            if (MapEvent.PlayerMapEvent == null) return; // Shouldn't hit this, but just in case
+
+            var killerSide =
+                MapEvent.PlayerMapEvent.GetMapEventSide(1 - MapEvent.PlayerMapEvent
+                    .PlayerSide);
+            var killerPartyName = killerSide.LeaderParty.Name.ToString();
+
             for (var _ = 0; _ < numberKilled; _++) {
-                _customTroopNameManager.AnonymousTroopDied(character);
+                _customTroopNameManager.AnonymousTroopDied(character, $"killed in battle against {killerPartyName}");
             }
         }
 

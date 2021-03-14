@@ -73,8 +73,10 @@ namespace CustomTroopNames {
             var affectedTroopInfo = affectedAgent
                 ?.GetComponent<CustomNameAgentComponent>()?.TroopInfo;
             if (affectedTroopInfo == null) return;
-
-            _nameManager.TroopDied(affectedAgent.Character, affectedTroopInfo);
+            var causeOfDeath = affectorAgent == null
+                ? "killed in battle"
+                : $"killed by {affectedAgent.Name}";
+            _nameManager.TroopDied(affectedAgent.Character, affectedTroopInfo, causeOfDeath);
         }
 
         private static void RenameAgent(Agent agent, string customName) {

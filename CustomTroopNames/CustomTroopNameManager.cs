@@ -65,25 +65,25 @@ namespace CustomTroopNames {
             return removed;
         }
 
-        public void TroopDied(BasicCharacterObject type, CustomTroopInfo troopInfo) {
+        public void TroopDied(BasicCharacterObject type, CustomTroopInfo troopInfo, string causeOfDeath) {
             _troopNameMapping.TryGetValue(type.Name.ToString(), out var troops);
             if (troops == null || !troops.Remove(troopInfo)) {
                 Debug.WriteLine(
                     $"ERROR - didn't find {type.Name} to mark {troopInfo.Name} as dead");
             }
 
-            _troopGraveyard.Add(new DeadTroopInfo(troopInfo, type.Name.ToString()));
+            _troopGraveyard.Add(new DeadTroopInfo(troopInfo, type.Name.ToString(), causeOfDeath));
 
             InformationManager.DisplayMessage(
                 new InformationMessage($"{troopInfo.Name} DIES",
                     ModColors.AlertColor));
         }
 
-        public void AnonymousTroopDied(BasicCharacterObject type) {
+        public void AnonymousTroopDied(BasicCharacterObject type, string causeOfDeath) {
             _troopNameMapping.TryGetValue(type.Name.ToString(), out var troops);
             if (troops == null || troops.Count == 0) return;
             // TODO determine randomly based on total number of troops of this class
-            TroopDied(type, troops[0]);
+            TroopDied(type, troops[0], causeOfDeath);
         }
 
         public void TroopDeserted(CharacterObject type, TroopRoster rosterBeforeDesertion) {
@@ -93,7 +93,7 @@ namespace CustomTroopNames {
             rosterBeforeDesertion.AddToCounts(type, -1);
 
             ModColors.AlertMessage($"{deserted.Name} has deserted!");
-            _troopGraveyard.Add(new DeadTroopInfo(deserted, type.Name.ToString()));
+            _troopGraveyard.Add(new DeadTroopInfo(deserted, type.Name.ToString(), "deserted"));
         }
 
         // Clones the _troopNameMapping dictionary into a new one that will be mutated in order to assign the troops to agents in the battle handler
@@ -121,7 +121,7 @@ namespace CustomTroopNames {
                 while (namedTroops.Count > troopCount) {
                     var troop = namedTroops[0];
                     ModColors.AlertMessage($"{troop.Name} vanishes in a puff of logic.");
-                    _troopGraveyard.Add(new DeadTroopInfo(troop, troopName));
+                    _troopGraveyard.Add(new DeadTroopInfo(troop, troopName, "killed by programming error"));
                     namedTroops.RemoveAt(0);
                 }
             }
@@ -132,7 +132,7 @@ namespace CustomTroopNames {
             if (showGrave) {
                 foreach (var deadTroop in _troopGraveyard) {
                     InformationManager.DisplayMessage(new InformationMessage(
-                        $"{deadTroop.Info.Name} - dead {deadTroop.TroopType} with {deadTroop.Info.Kills} kills",
+                        $"{deadTroop.Info.Name} - {deadTroop.TroopType} {deadTroop.CauseOfDeath} with {deadTroop.Info.Kills} kills",
                         ModColors.AlertColor));
                 }
             }
