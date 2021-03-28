@@ -88,12 +88,22 @@ namespace CustomTroopNames {
 
         public void TroopDeserted(CharacterObject type, TroopRoster rosterBeforeDesertion) {
             var deserted = RemoveRandomTroopIfNecessary(type, rosterBeforeDesertion);
-            if (deserted == null) return;
             // Adjust the roster in case multiple desertions happen simultaneously
             rosterBeforeDesertion.AddToCounts(type, -1);
+            if (deserted == null) return;
 
             ModColors.AlertMessage($"{deserted.Name} has deserted!");
             _troopGraveyard.Add(new DeadTroopInfo(deserted, type.Name.ToString(), "deserted"));
+        }
+
+        public void TroopAbandoned(CharacterObject type,  TroopRoster rosterBeforeAbandonment) {
+            var abandoned = RemoveRandomTroopIfNecessary(type, rosterBeforeAbandonment);
+            // Adjust the roster in case multiple desertions happen simultaneously
+            rosterBeforeAbandonment.AddToCounts(type, -1);
+            if (abandoned == null) return;
+
+            ModColors.AlertMessage($"{abandoned.Name} was removed from the party!");
+            _troopGraveyard.Add(new DeadTroopInfo(abandoned, type.Name.ToString(), "went their separate ways"));
         }
 
         // Clones the _troopNameMapping dictionary into a new one that will be mutated in order to assign the troops to agents in the battle handler
