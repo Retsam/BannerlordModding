@@ -14,6 +14,11 @@ namespace CustomTroopNames {
         private List<DeadTroopInfo> _troopGraveyard =
             new List<DeadTroopInfo>();
 
+        // Party Name -> Troop Type -> Troops with that name
+        private Dictionary<string, Dictionary<string, List<CustomTroopInfo>>>
+            _awayFromPartyTroops =
+                new Dictionary<string, Dictionary<string, List<CustomTroopInfo>>>();
+
         private readonly RecruitTroopInquiryManager _recruitTroopInquiryManager;
 
         private static readonly Random Rnd = new Random();
@@ -52,17 +57,19 @@ namespace CustomTroopNames {
                 ModColors.MainColor));
         }
 
-        private CustomTroopInfo RemoveRandomTroopIfNecessary(CharacterObject type, TroopRoster roster) {
+        private void RemoveRandomTroopIfNecessary(CharacterObject type, TroopRoster roster, Action<CustomTroopInfo> onRemove) {
             _troopNameMapping.TryGetValue(type.Name.ToString(), out var troops);
+            // Decrement the roster to mark that the troop has been removed, for future calculations
+            roster.AddToCounts(type, -1);
             if (
-                troops == null
-                || troops.Count == 0
-                || roster.GetTroopCount(type) > troops.Count) return null;
+                (troops?.Count ?? 0) == 0
+                // >= because we just decremented
+                || roster.GetTroopCount(type) >= troops.Count) return;
 
             var removeIdx = Rnd.Next(troops.Count);
             var removed = troops[removeIdx];
             troops.RemoveAt(removeIdx);
-            return removed;
+            onRemove(removed);
         }
 
         public void TroopDied(BasicCharacterObject type, CustomTroopInfo troopInfo, string causeOfDeath) {
@@ -87,23 +94,66 @@ namespace CustomTroopNames {
         }
 
         public void TroopDeserted(CharacterObject type, TroopRoster rosterBeforeDesertion) {
-            var deserted = RemoveRandomTroopIfNecessary(type, rosterBeforeDesertion);
-            // Adjust the roster in case multiple desertions happen simultaneously
-            rosterBeforeDesertion.AddToCounts(type, -1);
-            if (deserted == null) return;
-
-            ModColors.AlertMessage($"{deserted.Name} has deserted!");
-            _troopGraveyard.Add(new DeadTroopInfo(deserted, type.Name.ToString(), "deserted"));
+            RemoveRandomTroopIfNecessary(type, rosterBeforeDesertion, deserted => {
+                ModColors.AlertMessage($"{deserted.Name} has deserted!");
+                _troopGraveyard.Add(new DeadTroopInfo(deserted, type.Name.ToString(),
+                    "deserted"));
+            });
         }
 
         public void TroopAbandoned(CharacterObject type,  TroopRoster rosterBeforeAbandonment) {
-            var abandoned = RemoveRandomTroopIfNecessary(type, rosterBeforeAbandonment);
-            // Adjust the roster in case multiple desertions happen simultaneously
-            rosterBeforeAbandonment.AddToCounts(type, -1);
-            if (abandoned == null) return;
+            RemoveRandomTroopIfNecessary(type, rosterBeforeAbandonment, abandoned => {
+                ModColors.AlertMessage($"{abandoned.Name} was removed from the party!");
+                _troopGraveyard.Add(new DeadTroopInfo(abandoned, type.Name.ToString(), "went their separate ways"));
+            });
 
-            ModColors.AlertMessage($"{abandoned.Name} was removed from the party!");
-            _troopGraveyard.Add(new DeadTroopInfo(abandoned, type.Name.ToString(), "went their separate ways"));
+        }
+
+        // Troop leaves main party to join other party, only move named troop if necessary
+        public void TroopLeavesParty(CharacterObject type, TroopRoster roster, string partyName) {
+            RemoveRandomTroopIfNecessary(type, roster, troopInfo => {
+                ModColors.InfoMessage($"{troopInfo.Name} was left with {partyName}");
+                var troopType = type.Name.ToString();
+
+                // Get the party's dictionary, or else insert the new one
+                _awayFromPartyTroops.TryGetValue(partyName, out var partyTroops);
+                if (partyTroops == null) {
+                    var newDict = new Dictionary<string, List<CustomTroopInfo>> { [troopType]= new List<CustomTroopInfo> {troopInfo} };
+                    _awayFromPartyTroops.Add(partyName, newDict);
+                    return;
+                }
+
+                // Get the party's troop list, or else insert a new one
+                partyTroops.TryGetValue(troopType, out var troopList);
+                if (troopList == null) {
+                    partyTroops.Add(troopType, new List<CustomTroopInfo> {troopInfo});
+                } else {
+                    troopList.Add(troopInfo);
+                }
+            });
+        }
+
+        public void TroopReturnsToParty(CharacterObject type, string partyName) {
+            _awayFromPartyTroops.TryGetValue(partyName, out var partyTroops);
+            if (partyTroops == null) return;
+
+            partyTroops.TryGetValue(type.Name.ToString(), out var troopList);
+            if (troopList == null || troopList.Count == 0) return;
+
+            // randomize?
+            var troop = troopList[0];
+            // Clean up empty arrays
+            if (troopList.Count == 1) {
+                partyTroops.Remove(type.Name.ToString());
+                if (partyTroops.Count == 0) {
+                    _awayFromPartyTroops.Remove(partyName);
+                }
+            } else {
+                troopList.RemoveAt(0);
+            }
+
+            AddTroop(type, troop);
+            ModColors.InfoMessage($"{troop.Name} rejoins the party");
         }
 
         // Clones the _troopNameMapping dictionary into a new one that will be mutated in order to assign the troops to agents in the battle handler
@@ -138,24 +188,30 @@ namespace CustomTroopNames {
         }
 
 
-        public void PrintDebug(bool showGrave) {
-            if (showGrave) {
-                foreach (var deadTroop in _troopGraveyard) {
-                    InformationManager.DisplayMessage(new InformationMessage(
-                        $"{deadTroop.Info.Name} - {deadTroop.TroopType} {deadTroop.CauseOfDeath} with {deadTroop.Info.Kills} kills",
-                        ModColors.AlertColor));
+        public void PrintTroops() {
+            foreach (var pair in _troopNameMapping) {
+                var troopName = pair.Key;
+                foreach (var troopInfo in pair.Value) {
+                    var killInfo = troopInfo.Kills == 0 ? "" :
+                        troopInfo.Kills == 1 ? "(1 Kill)" :
+                        $"({troopInfo.Kills} Kills)";
+                    ModColors.InfoMessage($"{troopName} {troopInfo.Name} {killInfo}");
                 }
             }
-            else {
-                foreach (var pair in _troopNameMapping) {
-                    var troopName = pair.Key;
-                    foreach (var troopInfo in pair.Value) {
-                        var killInfo = troopInfo.Kills == 0 ? "" :
-                            troopInfo.Kills == 1 ? "(1 Kill)" :
-                            $"({troopInfo.Kills} Kills)";
-                        InformationManager.DisplayMessage(new InformationMessage
-                        ($"{troopName} {troopInfo.Name} {killInfo}",
-                            ModColors.MainColor));
+        }
+        public void PrintGrave() {
+            foreach (var deadTroop in _troopGraveyard) {
+                ModColors.AlertMessage(
+                    $"{deadTroop.Info.Name} - {deadTroop.TroopType} {deadTroop.CauseOfDeath} with {deadTroop.Info.Kills} kills"
+                );
+            }
+        }
+
+        public void PrintAway() {
+            foreach (var awayParty in _awayFromPartyTroops) {
+                foreach (var awayTroops in awayParty.Value) {
+                    foreach (var troopInfo in awayTroops.Value) {
+                        ModColors.InfoMessage($"{troopInfo.Name} - {awayTroops.Key} left with {awayParty.Key}.");
                     }
                 }
             }
@@ -164,6 +220,7 @@ namespace CustomTroopNames {
         public void SyncData(IDataStore dataStore) {
             dataStore.SyncData("_troopNameMapping", ref _troopNameMapping);
             dataStore.SyncData("_troopGraveyard", ref _troopGraveyard);
+            dataStore.SyncData("_awayFromPartyTroops", ref _awayFromPartyTroops);
         }
     }
 

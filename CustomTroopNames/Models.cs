@@ -42,6 +42,8 @@ namespace CustomTroopNames {
             ConstructContainerDefinition(typeof(List<CustomTroopInfo>));
             ConstructContainerDefinition(
                 typeof(Dictionary<string, List<CustomTroopInfo>>));
+            ConstructContainerDefinition(
+                typeof(Dictionary<string, Dictionary<string, List<CustomTroopInfo>>>));
             ConstructContainerDefinition(typeof(List<DeadTroopInfo>));
         }
     }

@@ -47,10 +47,20 @@ namespace CustomTroopNames {
 
         protected override void OnApplicationTick(float dt) {
             base.OnApplicationTick(dt);
-            if (Input.IsKeyPressed(InputKey.Tilde)) {
-                Campaign.Current
-                    ?.GetCampaignBehavior<CustomTroopNamesCampaignBehavior>()
-                    ?.TroopManager.PrintDebug(Input.IsKeyDown(InputKey.RightShift));
+            if (!Input.IsKeyPressed(InputKey.Tilde)) return;
+
+            var troopManager = Campaign.Current
+                ?.GetCampaignBehavior<CustomTroopNamesCampaignBehavior>()
+                ?.TroopManager;
+            if (troopManager == null) return;
+            if (Input.IsKeyDown(InputKey.RightShift)) {
+                if (Input.IsKeyDown(InputKey.RightControl)) {
+                    troopManager.PrintAway();
+                } else {
+                    troopManager.PrintGrave();
+                }
+            } else {
+                troopManager.PrintTroops();
             }
         }
     }
@@ -137,11 +147,19 @@ namespace CustomTroopNames {
                                 Debug.WriteLine("Negative troop counts while transferring nowhere?");
                             }
                             customTroopBehavior.TroopAbandoned(pair.Key, originalRosterCopy);
-                        } else {/* transfer */}
+                        } else {
+                            var partyName = PartyScreenManager.PartyScreenLogic
+                                // c.f. LeftOwnerParty.Name
+                                .LeftPartyName.ToString();
+                            if (pair.Value > 0) {
+                                customTroopBehavior.TroopLeavesParty(pair.Key, originalRosterCopy, partyName);
+                            } else {
+                                customTroopBehavior.TroopReturnsToParty(pair.Key, partyName);
+                            }
+                        }
 
                     }
                 }
-                Debug.WriteLine("DONE");
             });
             // var isTransferToSettlement =
             //     PlayerEncounter.LocationEncounter?.Settlement?.GetComponent<Fief>()?
