@@ -87,4 +87,13 @@ namespace CustomTroopNames {
             agent.Character.Name = originalName;
         }
     }
+
+    public class CustomNameAgentComponent : AgentComponent {
+        public readonly CustomTroopInfo TroopInfo;
+
+        public CustomNameAgentComponent(Agent agent, CustomTroopInfo troopInfo) :
+            base(agent) {
+            TroopInfo = troopInfo;
+        }
+    }
 }
