@@ -68,7 +68,11 @@ namespace CustomTroopNames.Views {
 
             PartyScreenManager.PartyScreenLogic.Update += command => {
                 // TODO: check RecruitTroop case?
-                if (command.Code != PartyScreenLogic.PartyCommandCode.TransferTroop && command.Code != PartyScreenLogic.PartyCommandCode.RecruitTroop)
+                if (
+                    command.Type == PartyScreenLogic.TroopType.Prisoner
+                    || !(command.Code == PartyScreenLogic.PartyCommandCode.TransferTroop
+                        || command.Code == PartyScreenLogic.PartyCommandCode.RecruitTroop)
+                )
                     return;
 
                 _troopTransferCounts.TryGetValue(command.Character, out var prevCount);
