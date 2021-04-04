@@ -4,6 +4,7 @@ using TaleWorlds.Core;
 using TaleWorlds.InputSystem;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
+using Debug = System.Diagnostics.Debug;
 
 namespace CustomTroopNames {
     internal static class ModColors {
@@ -88,6 +89,12 @@ namespace CustomTroopNames {
             CampaignEvents.HourlyTickEvent.AddNonSerializedListener(this, () => {
                 TroopManager.CheckValid();
             });
+            CampaignEvents.HeroPrisonerTaken.AddNonSerializedListener(this,
+                (party, hero) => {
+                    if (hero != Hero.MainHero) return;
+                    var captor = party.Leader?.Name.ToString() ?? party.Name.ToString();
+                    TroopManager.PartyWipe($"taken captive by {captor}");
+                });
         }
 
         public override void SyncData(IDataStore dataStore) {

@@ -156,6 +156,17 @@ namespace CustomTroopNames {
             ModColors.InfoMessage($"{troop.Name} rejoins the party");
         }
 
+        public void PartyWipe(string reason) {
+            foreach (var pair in _troopNameMapping) {
+                foreach (var troop in pair.Value) {
+                    _troopGraveyard.Add(new DeadTroopInfo(troop, pair.Key, reason));
+                    ModColors.AlertMessage($"{troop.Name} was {reason}");
+                }
+            }
+
+            _troopNameMapping = new Dictionary<string, List<CustomTroopInfo>>();
+        }
+
         // Clones the _troopNameMapping dictionary into a new one that will be mutated in order to assign the troops to agents in the battle handler
         public Dictionary<string, List<CustomTroopInfo>> GetTroopsToAssign() {
             return _troopNameMapping.ToDictionary(pair => pair.Key,
@@ -224,7 +235,7 @@ namespace CustomTroopNames {
         }
     }
 
-    class RecruitTroopInquiryManager {
+    internal class RecruitTroopInquiryManager {
         private List<CharacterObject> _textPromptsToShow = new List<CharacterObject>();
         private Task _flushTextPromptsTask;
         private readonly Action<CharacterObject, string> _onTroopRecruited;
