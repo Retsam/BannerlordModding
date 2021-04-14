@@ -1,0 +1,24 @@
+<Module>
+    <Name value="CustomTroopNames" />
+    <Id value="CustomTroopNames" />
+    <Version value="a1.0.0" />
+    <SingleplayerModule value="true" />
+    <MultiplayerModule value="false" />
+
+    <DependedModules>
+        <DependedModule Id="Native" />
+        <DependedModule Id="SandBoxCore" />
+        <DependedModule Id="Sandbox" />
+        <DependedModule Id="StoryMode" />
+    </DependedModules>
+
+    <SubModules>
+        <SubModule>
+            <Name value="CustomTroopNames" />
+            <Version value="a1.0.0" />
+            <DLLName value="CustomTroopNames.dll" />
+            <SubModuleClassType value="CustomTroopNames.CustomTroopsSubModule" />
+            <Tags />
+        </SubModule>
+    </SubModules>
+</Module>
