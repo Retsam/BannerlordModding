@@ -86,11 +86,11 @@ namespace CustomTroopNames {
                     ModColors.AlertColor));
         }
 
-        public void AnonymousTroopDied(BasicCharacterObject type, string causeOfDeath) {
+        public void AnonymousTroopDied(BasicCharacterObject type, int totalTroops, string causeOfDeath) {
             _troopNameMapping.TryGetValue(type.Name.ToString(), out var troops);
-            if (troops == null || troops.Count == 0) return;
-            // TODO determine randomly based on total number of troops of this class
-            TroopDied(type, troops[0], causeOfDeath);
+            var troopToKill = Rnd.Next(totalTroops);
+            if (troops == null || troops.Count == 0 || troopToKill >= troops.Count) return;
+            TroopDied(type, troops[troopToKill], causeOfDeath);
         }
 
         public void TroopDeserted(CharacterObject type, TroopRoster rosterBeforeDesertion) {

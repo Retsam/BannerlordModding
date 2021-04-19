@@ -47,16 +47,18 @@ namespace CustomTroopNames.Views {
                 numberKilled, numberWounded, numberRouted, killCount,
                 numberReadyToUpgrade);
 
-            if (battleCombatant != PartyBase.MainParty) return;
+            if (!(battleCombatant is PartyBase party) || party != PartyBase.MainParty) return;
             if (MapEvent.PlayerMapEvent == null) return; // Shouldn't hit this, but just in case
 
             var killerSide =
                 MapEvent.PlayerMapEvent.GetMapEventSide(1 - MapEvent.PlayerMapEvent
                     .PlayerSide);
             var killerPartyName = killerSide.LeaderParty.Name.ToString();
+            if (!(character is CharacterObject charObj)) return;
+            var totalTroops = party.MemberRoster.GetTroopCount(charObj) + numberKilled;
 
-            for (var _ = 0; _ < numberKilled; _++) {
-                _customTroopNameManager.AnonymousTroopDied(character, $"killed in battle against {killerPartyName}");
+            for (var i = 0; i < numberKilled; i++) {
+                _customTroopNameManager.AnonymousTroopDied(character, totalTroops - i, $"killed in battle against {killerPartyName}");
             }
         }
 
