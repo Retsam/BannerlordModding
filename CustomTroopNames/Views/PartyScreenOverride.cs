@@ -40,10 +40,9 @@ namespace CustomTroopNames.Views {
                 foreach (var pair in _troopTransferCounts) {
                     for (var i = 0; i < Math.Abs(pair.Value); i++) {
                         if (PartyScreenManager.PartyScreenLogic.LeftOwnerParty == null) {
-                            if (pair.Value < 0) {
-                                Debug.WriteLine("Negative troop counts while transferring nowhere?");
+                            if (pair.Value > 0) {
+                                customTroopBehavior.TroopAbandoned(pair.Key, originalRosterCopy);
                             }
-                            customTroopBehavior.TroopAbandoned(pair.Key, originalRosterCopy);
                         } else {
                             var partyName = PartyScreenManager.PartyScreenLogic
                                 // c.f. LeftOwnerParty.Name
