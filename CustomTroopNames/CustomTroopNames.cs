@@ -1,10 +1,12 @@
-﻿using JetBrains.Annotations;
+﻿using CustomTroopNames.Views;
+using JetBrains.Annotations;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
+using TaleWorlds.Engine.Screens;
 using TaleWorlds.InputSystem;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
-using Debug = System.Diagnostics.Debug;
+using TaleWorlds.MountAndBlade.View.Missions;
 
 namespace CustomTroopNames {
     internal static class ModColors {
@@ -39,6 +41,8 @@ namespace CustomTroopNames {
             mission.AddMissionBehaviour(new HighlightsMissionBehavior());
         }
 
+        private bool isPushed = false;
+
         protected override void OnApplicationTick(float dt) {
             base.OnApplicationTick(dt);
             if (!Input.IsKeyPressed(InputKey.Tilde)) return;
@@ -54,7 +58,14 @@ namespace CustomTroopNames {
                     troopManager.PrintGrave();
                 }
             } else {
-                troopManager.PrintTroops();
+                if (isPushed) {
+                    ScreenManager.PopScreen();
+                } else {
+                    ScreenManager.PushScreen(ViewCreatorManager.CreateScreenView<TroopsScreen>());
+                }
+
+                isPushed = !isPushed;
+                // troopManager.PrintTroops();
             }
         }
     }

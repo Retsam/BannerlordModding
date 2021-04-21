@@ -223,6 +223,7 @@
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="Views\BattleSimulationOverride.cs" />
         <Compile Include="Views\PartyScreenOverride.cs" />
+        <Compile Include="Views\TroopsView.cs" />
     </ItemGroup>
     <ItemGroup>
       <Content Include="CustomTroopNames\GUI\Prefabs\PartyScreen.xml" />
