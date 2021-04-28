@@ -32,7 +32,7 @@ namespace CustomTroopNames.Views {
     public class TroopsVM : ViewModel {
         [DataSourceProperty]
         private void CloseCustomScreen() {
-            Game.Current.GameStateManager.PopState(0);
+            ScreenManager.PopScreen();
         }
     }
 

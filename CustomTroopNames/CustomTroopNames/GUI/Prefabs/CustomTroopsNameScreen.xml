@@ -53,7 +53,7 @@
                 <!--Top Panel-->
                 <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="755" SuggestedHeight="176" HorizontalAlignment="Center" PositionXOffset="60" Sprite="StdAssets\tabbar_standart" ValueFactor="-30">
                     <Children>
-                        <RichTextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Top" PositionYOffset="-5" Brush="Quest.CenterPanel.Title.Text" Brush.FontSize="45" Text="@QuestTitleText" />
+                        <RichTextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Top" PositionYOffset="-5" Brush="Quest.CenterPanel.Title.Text" Brush.FontSize="45" Text="Troops" />
                     </Children>
                 </Widget>
 
@@ -76,7 +76,6 @@
                                 <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginTop="!LeftPanel.Margin.Top">
                                     <Children>
 
-
                                         <ScrollablePanel WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginBottom="!LeftPanel.Margin.Bottom" AutoHideScrollBarHandle="true" AutoHideScrollBars="true" ClipRect="QuestsClipRect" InnerPanel="QuestsClipRect\QuestsList" VerticalScrollbar="..\QuestsScrollbar\Scrollbar" >
                                             <Children>
 
@@ -89,7 +88,7 @@
 
                                                                 <ToggleWidget DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Quest.LeftPanel.QuestButton.Active.Width" SuggestedHeight="!Quest.LeftPanel.Toggle.Height" MarginLeft="!Quest.LeftPanel.Toggle.Margin.Left" Brush="Quest.LeftPanel.Toggle" RenderLate="true" WidgetToClose="..\ActiveQuestsList">
                                                                     <Children>
-                                                                        <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Quest.LeftPanel.Toggle.Text" Text="@ActiveQuestsText" />
+                                                                        <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Quest.LeftPanel.Toggle.Text" Text="TEST" />
                                                                     </Children>
                                                                 </ToggleWidget>
 
@@ -185,63 +184,9 @@
                             </Children>
                         </BrushListPanel>
 
-                        <!--Right Panel-->
-                        <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginLeft="!RightPanel.Margin.Left" MarginRight="!RightPanel.Margin.Right" MarginTop="!RightPanel.Margin.Top" >
-                            <Children>
-
-                                <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush.FontSize="42" IsHidden="@IsThereAnyQuest" Text="@NoActiveQuestText" />
-
-                                <!--Current Quest Title-->
-                                <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren">
-                                    <Children>
-                                        <RichTextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" Brush="Quest.CenterPanel.Title.Text" Brush.FontSize="42" Brush.TextHorizontalAlignment="Center" Text="@CurrentQuestTitle" />
-                                    </Children>
-                                </Widget>
-
-                                <ScrollbarWidget Id="QuestLogScrollbar" WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" SuggestedWidth="16" HorizontalAlignment="Left" MarginLeft="10" MarginTop="70" MarginBottom="20" Sprite="SPParty\ScrollBar01TrackBG@2x" AlignmentAxis="Vertical" Handle="QuestLogScrollbarHandle" IsVisible="false" MaxValue="100" MinValue="0">
-                                    <Children>
-                                        <Widget Id="QuestLogScrollbarHandle" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" VerticalAlignment="Top" Sprite="ScrollBar01Track@2x_9" IsVisible="false" />
-                                    </Children>
-                                </ScrollbarWidget>
-
-                                <ScrollablePanel WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" HorizontalAlignment="Center" MarginLeft="50" MarginTop="50" MarginBottom="20" AutoHideScrollBars="true" ClipRect="MyClipRect" InnerPanel="MyClipRect\ParentList" VerticalScrollbar="..\QuestLogScrollbar">
-                                    <Children>
-
-                                        <Widget Id="MyClipRect" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginTop="20" MarginBottom="10" ClipContents="true">
-                                            <Children>
-
-                                                <ListPanel Id="ParentList" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="VerticalBottomToTop">
-                                                    <Children>
-
-                                                        <!--Current Quest Stages-->
-                                                        <ListPanel Id="CurrentQuestStagesList" DataSource="{CurrentQuestStages}" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="VerticalBottomToTop">
-                                                            <ItemTemplate>
-                                                                <QuestsStageItem MarginBottom="!RightPanel.QuestStage.Margin.Bottom" />
-                                                            </ItemTemplate>
-                                                        </ListPanel>
-
-                                                        <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="!RightPanel.QuestList.Padding.Bottom" IsEnabled="false" />
-
-                                                    </Children>
-                                                </ListPanel>
-
-                                            </Children>
-                                        </Widget>
-                                    </Children>
-                                </ScrollablePanel>
-
-                            </Children>
-                        </Widget>
-
                     </Children>
                 </ListPanel>
 
-                <!--Track Quest Button-->
-                <Widget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Right" MarginRight="350" MarginTop="100" IsVisible="@IsThereAnyQuest">
-                    <Children>
-                        <ButtonWidget DataSource="{SelectedQuest}" DoNotPassEventsToChildren="true" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" Command.Click="ExecuteToggleQuestTrack" UpdateChildrenStates="true" IsVisible="@IsTrackable" />
-                    </Children>
-                </Widget>
 
                 <!--Info Box-->
                 <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="357" SuggestedHeight="205" HorizontalAlignment="Right" MarginTop="10">
@@ -278,7 +223,7 @@
                 </Widget>
 
                 <!--Close Screen Button-->
-                <Standard.DialogCloseButtons VisualDefinition="BottomMenu" HorizontalAlignment="Center" VerticalAlignment="Bottom" PositionYOffset="100" Parameter.DoneButtonAction="ExecuteClose" Parameter.DoneButtonText="@DoneLbl" Parameter.ShowCancel="false" />
+                <Standard.DialogCloseButtons VisualDefinition="BottomMenu" HorizontalAlignment="Center" VerticalAlignment="Bottom" PositionYOffset="100" Parameter.DoneButtonAction="CloseCustomScreen" Parameter.DoneButtonText="Done" Parameter.ShowCancel="false" />
 
             </Children>
         </Widget>

@@ -41,8 +41,6 @@ namespace CustomTroopNames {
             mission.AddMissionBehaviour(new HighlightsMissionBehavior());
         }
 
-        private bool isPushed = false;
-
         protected override void OnApplicationTick(float dt) {
             base.OnApplicationTick(dt);
             if (!Input.IsKeyPressed(InputKey.Tilde)) return;
@@ -58,13 +56,10 @@ namespace CustomTroopNames {
                     troopManager.PrintGrave();
                 }
             } else {
-                if (isPushed) {
-                    ScreenManager.PopScreen();
-                } else {
+                if (!(ScreenManager.TopScreen is TroopsScreen)) {
                     ScreenManager.PushScreen(ViewCreatorManager.CreateScreenView<TroopsScreen>());
                 }
 
-                isPushed = !isPushed;
                 // troopManager.PrintTroops();
             }
         }
