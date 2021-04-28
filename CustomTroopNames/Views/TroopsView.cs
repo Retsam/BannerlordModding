@@ -52,7 +52,7 @@ namespace CustomTroopNames.Views {
             };
             AddLayer(_gauntletLayer);
             _gauntletLayer.InputRestrictions.SetInputRestrictions();
-            _gauntletLayer.LoadMovie("ClanScreen", _dataSource);
+            _gauntletLayer.LoadMovie("CustomTroopsNameScreen", _dataSource);
         }
 
         protected override void OnActivate()

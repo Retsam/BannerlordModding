@@ -226,7 +226,7 @@
         <Compile Include="Views\TroopsView.cs" />
     </ItemGroup>
     <ItemGroup>
-      <Content Include="CustomTroopNames\GUI\Prefabs\PartyScreen.xml" />
+      <Content Include="CustomTroopNames\GUI\Prefabs\CustomTroopsNameScreen.xml" />
       <Content Include="CustomTroopNames\SubModule.xml" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
