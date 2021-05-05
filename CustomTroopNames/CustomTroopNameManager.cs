@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using CustomTroopNames.Views;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
+using TaleWorlds.Library;
+using Debug = System.Diagnostics.Debug;
 
 namespace CustomTroopNames {
     public class CustomTroopNameManager {
@@ -198,6 +200,15 @@ namespace CustomTroopNames {
             }
         }
 
+        public MBBindingList<CustomTroopInfoVm> GetTroopViews() {
+            var troops = new MBBindingList<CustomTroopInfoVm>();
+            foreach (var pair in _troopNameMapping) {
+                foreach (var troopInfo in pair.Value) {
+                    troops.Add(new CustomTroopInfoVm(pair.Key, troopInfo));
+                }
+            }
+            return troops;
+        }
 
         public void PrintTroops() {
             foreach (var pair in _troopNameMapping) {

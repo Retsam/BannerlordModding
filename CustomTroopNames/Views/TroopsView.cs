@@ -1,4 +1,5 @@
 using JetBrains.Annotations;
+using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.Engine.GauntletUI;
 using TaleWorlds.Engine.Screens;
@@ -13,6 +14,9 @@ namespace CustomTroopNames.Views {
     }
 
     public class CustomTroopInfoVm: ViewModel {
+        public CustomTroopInfoVm(string troopKind, CustomTroopInfo info) {
+            Name = info.Name;
+        }
         [UsedImplicitly]
         [DataSourceProperty] public string Name { get; set; }
     }
@@ -20,7 +24,9 @@ namespace CustomTroopNames.Views {
     public class TroopsVm : ViewModel {
         public TroopsVm() {
             CurrentPartyList =
-                new MBBindingList<CustomTroopInfoVm> { new CustomTroopInfoVm {Name = "Alice"}, new CustomTroopInfoVm {Name = "Bob"} };
+                Campaign.Current?.GetCampaignBehavior<CustomTroopNamesCampaignBehavior>()
+                    ?.TroopManager?.GetTroopViews() ??
+                new MBBindingList<CustomTroopInfoVm>();
         }
 
         [DataSourceProperty]
