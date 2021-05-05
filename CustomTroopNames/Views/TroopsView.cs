@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using TaleWorlds.Core;
 using TaleWorlds.Engine.GauntletUI;
 using TaleWorlds.Engine.Screens;
@@ -8,29 +9,26 @@ namespace CustomTroopNames.Views {
     // public interface CustomStateHandler { }
 
     public class CustomState : GameState {
-        // public CustomStateHandler Handler { get; set; }
-
         public override bool IsMenuState => true;
     }
 
-    // public interface CustomNavigationHandler : INavigationHandler {
-    //     void OpenTroopsScreen();
-    // }
-    //
-    // public class CustomNavigation : MapNavigationHandler, CustomNavigationHandler {
-    //     private readonly Game _game;
-    //
-    //     public CustomNavigation() {
-    //         _game = Game.Current;
-    //     }
-    //
-    //     public void OpenTroopsScreen() {
-    //         _game.GameStateManager.PushState(_game.GameStateManager.CreateState<CustomState>());
-    //     }
-    // }
+    public class CustomTroopInfoVm: ViewModel {
+        [UsedImplicitly]
+        [DataSourceProperty] public string Name { get; set; }
+    }
 
-    public class TroopsVM : ViewModel {
+    public class TroopsVm : ViewModel {
+        public TroopsVm() {
+            CurrentPartyList =
+                new MBBindingList<CustomTroopInfoVm> { new CustomTroopInfoVm {Name = "Alice"}, new CustomTroopInfoVm {Name = "Bob"} };
+        }
+
         [DataSourceProperty]
+        [UsedImplicitly]
+        public MBBindingList<CustomTroopInfoVm> CurrentPartyList { get; }
+
+        [DataSourceProperty]
+        [UsedImplicitly]
         private void CloseCustomScreen() {
             ScreenManager.PopScreen();
         }
@@ -39,13 +37,12 @@ namespace CustomTroopNames.Views {
     [GameStateScreen(typeof(CustomState))]
     public class TroopsScreen : ScreenBase {
         private GauntletLayer _gauntletLayer;
-        private readonly CustomState _customState;
-        private TroopsVM _dataSource;
+        private TroopsVm _dataSource;
 
         protected override void OnInitialize()
         {
             base.OnInitialize();
-            _dataSource = new TroopsVM();
+            _dataSource = new TroopsVm();
             _gauntletLayer = new GauntletLayer(100)
             {
                 IsFocusLayer = true
