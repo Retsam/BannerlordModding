@@ -16,9 +16,17 @@ namespace CustomTroopNames.Views {
     public class CustomTroopInfoVm: ViewModel {
         public CustomTroopInfoVm(string troopKind, CustomTroopInfo info) {
             Name = info.Name;
+            TroopType = troopKind;
+            Kills = $"{info.Kills} kills";
         }
         [UsedImplicitly]
         [DataSourceProperty] public string Name { get; set; }
+
+        [UsedImplicitly]
+        [DataSourceProperty] public string TroopType { get; set; }
+
+        [UsedImplicitly]
+        [DataSourceProperty] public string Kills { get; set; }
     }
 
     public class TroopsVm : ViewModel {
