@@ -5,6 +5,7 @@ using TaleWorlds.Engine.GauntletUI;
 using TaleWorlds.Engine.Screens;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade.View.Screen;
+using TaleWorlds.TwoDimension;
 
 namespace CustomTroopNames.Views {
     // public interface CustomStateHandler { }
@@ -52,18 +53,21 @@ namespace CustomTroopNames.Views {
     public class TroopsScreen : ScreenBase {
         private GauntletLayer _gauntletLayer;
         private TroopsVm _dataSource;
+        private SpriteCategory _questCategory;
+
 
         protected override void OnInitialize()
         {
             base.OnInitialize();
             _dataSource = new TroopsVm();
-            _gauntletLayer = new GauntletLayer(100)
-            {
+            _gauntletLayer = new GauntletLayer(100) {
                 IsFocusLayer = true
             };
-            AddLayer(_gauntletLayer);
+            _questCategory = UIResourceManager.SpriteData.SpriteCategories["ui_quest"];
+            _questCategory.Load(UIResourceManager.ResourceContext, UIResourceManager.UIResourceDepot);
             _gauntletLayer.InputRestrictions.SetInputRestrictions();
             _gauntletLayer.LoadMovie("CustomTroopsNameScreen", _dataSource);
+            AddLayer(_gauntletLayer);
         }
 
         protected override void OnActivate()
@@ -75,6 +79,7 @@ namespace CustomTroopNames.Views {
         protected override void OnDeactivate()
         {
             base.OnDeactivate();
+            _questCategory.Unload();
             _gauntletLayer.IsFocusLayer = false;
             ScreenManager.TryLoseFocus(_gauntletLayer);
         }
