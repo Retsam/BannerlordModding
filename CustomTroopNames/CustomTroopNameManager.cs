@@ -200,14 +200,19 @@ namespace CustomTroopNames {
             }
         }
 
-        public MBBindingList<CustomTroopInfoVm> GetTroopViews() {
+        public (MBBindingList<CustomTroopInfoVm>, MBBindingList<DeadTroopInfoVm>) GetTroopViews() {
             var troops = new MBBindingList<CustomTroopInfoVm>();
             foreach (var pair in _troopNameMapping) {
                 foreach (var troopInfo in pair.Value) {
                     troops.Add(new CustomTroopInfoVm(pair.Key, troopInfo));
                 }
             }
-            return troops;
+
+            var deadTroops = new MBBindingList<DeadTroopInfoVm>();
+            foreach (var troop in _troopGraveyard) {
+                deadTroops.Add(new DeadTroopInfoVm(troop));
+            }
+            return (troops, deadTroops);
         }
 
         public void PrintTroops() {

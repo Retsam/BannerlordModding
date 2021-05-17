@@ -86,6 +86,7 @@
                                                         <ListPanel Id="QuestsList" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="VerticalBottomToTop">
                                                             <Children>
 
+                                                                <!-- Current Party -->
                                                                 <ToggleWidget DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Quest.LeftPanel.QuestButton.Active.Width" SuggestedHeight="!Quest.LeftPanel.Toggle.Height" MarginLeft="!Quest.LeftPanel.Toggle.Margin.Left" Brush="Quest.LeftPanel.Toggle" RenderLate="true" WidgetToClose="..\ActiveQuestsList">
                                                                     <Children>
                                                                         <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Quest.LeftPanel.Toggle.Text" Text="Current Party" />
@@ -93,6 +94,25 @@
                                                                 </ToggleWidget>
 
                                                                 <ListPanel Id="CurrentPartyList" DataSource="{CurrentPartyList}" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="VerticalBottomToTop">
+                                                                    <ItemTemplate>
+                                                                        <ButtonWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Quest.LeftPanel.Toggle.Width" SuggestedHeight="!Quest.LeftPanel.Toggle.Height" Brush="Quest.LeftPanel.Toggle">
+                                                                            <Children>
+                                                                                <TextWidget Id="TroopNameText" WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" SuggestedWidth="440" MarginLeft="10" MarginRight="10" Brush="Quest.LeftPanel.Quest.Text" Brush.TextHorizontalAlignment="Left" Brush.TextVerticalAlignment="Center" Text="@Name" />
+                                                                                <TextWidget Id="TroopClassText" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginLeft="10" MarginRight="15" Brush="QuestStageTextBrush" Text="@TroopType" />
+                                                                                <TextWidget Id="TroopKillsText" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginLeft="10" MarginRight="15" Brush="Quest.LeftPanel.Quest.Time.Text" Text="@Kills" />
+                                                                            </Children>
+                                                                        </ButtonWidget>
+                                                                    </ItemTemplate>
+                                                                </ListPanel>
+
+                                                                <!-- Graveyard -->
+                                                                <ToggleWidget DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Quest.LeftPanel.QuestButton.Active.Width" SuggestedHeight="!Quest.LeftPanel.Toggle.Height" MarginLeft="!Quest.LeftPanel.Toggle.Margin.Left" Brush="Quest.LeftPanel.Toggle" RenderLate="true" WidgetToClose="..\ActiveQuestsList">
+                                                                    <Children>
+                                                                        <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Quest.LeftPanel.Toggle.Text" Text="Graveyard" />
+                                                                    </Children>
+                                                                </ToggleWidget>
+
+                                                                <ListPanel Id="GraveyardList" DataSource="{GraveyardList}" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="VerticalBottomToTop">
                                                                     <ItemTemplate>
                                                                         <ButtonWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Quest.LeftPanel.Toggle.Width" SuggestedHeight="!Quest.LeftPanel.Toggle.Height" Brush="Quest.LeftPanel.Toggle">
                                                                             <Children>
