@@ -20,22 +20,8 @@ namespace CustomTroopNames.Views {
             TroopType = troopKind;
             Kills = $"{info.Kills} kills";
         }
-        [UsedImplicitly]
-        [DataSourceProperty] public string Name { get; set; }
+        public CustomTroopInfoVm(DeadTroopInfo info): this(info.TroopType, info.Info) {}
 
-        [UsedImplicitly]
-        [DataSourceProperty] public string TroopType { get; set; }
-
-        [UsedImplicitly]
-        [DataSourceProperty] public string Kills { get; set; }
-    }
-
-    public class DeadTroopInfoVm: ViewModel {
-        public DeadTroopInfoVm(DeadTroopInfo info) {
-            Name = info.Info.Name;
-            Kills = $"{info.Info.Kills} kills";
-            TroopType = info.TroopType;
-        }
         [UsedImplicitly]
         [DataSourceProperty] public string Name { get; set; }
 
@@ -52,7 +38,7 @@ namespace CustomTroopNames.Views {
             (CurrentPartyList, GraveyardList) =
                 Campaign.Current?.GetCampaignBehavior<CustomTroopNamesCampaignBehavior>()
                     ?.TroopManager?.GetTroopViews() ??
-                (new MBBindingList<CustomTroopInfoVm>(), new MBBindingList<DeadTroopInfoVm>());
+                (new MBBindingList<CustomTroopInfoVm>(), new MBBindingList<CustomTroopInfoVm>());
         }
 
         [DataSourceProperty]
@@ -61,7 +47,7 @@ namespace CustomTroopNames.Views {
 
         [DataSourceProperty]
         [UsedImplicitly]
-        public MBBindingList<DeadTroopInfoVm> GraveyardList { get; }
+        public MBBindingList<CustomTroopInfoVm> GraveyardList { get; }
 
         [DataSourceProperty]
         [UsedImplicitly]

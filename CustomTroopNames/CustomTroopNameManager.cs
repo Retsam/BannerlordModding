@@ -200,7 +200,7 @@ namespace CustomTroopNames {
             }
         }
 
-        public (MBBindingList<CustomTroopInfoVm>, MBBindingList<DeadTroopInfoVm>) GetTroopViews() {
+        public (MBBindingList<CustomTroopInfoVm>, MBBindingList<CustomTroopInfoVm>) GetTroopViews() {
             var troops = new MBBindingList<CustomTroopInfoVm>();
             foreach (var pair in _troopNameMapping) {
                 foreach (var troopInfo in pair.Value) {
@@ -208,9 +208,9 @@ namespace CustomTroopNames {
                 }
             }
 
-            var deadTroops = new MBBindingList<DeadTroopInfoVm>();
+            var deadTroops = new MBBindingList<CustomTroopInfoVm>();
             foreach (var troop in _troopGraveyard) {
-                deadTroops.Add(new DeadTroopInfoVm(troop));
+                deadTroops.Add(new CustomTroopInfoVm(troop));
             }
             return (troops, deadTroops);
         }
