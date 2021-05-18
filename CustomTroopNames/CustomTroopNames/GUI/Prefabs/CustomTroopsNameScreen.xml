@@ -87,7 +87,7 @@
                                                             <Children>
 
                                                                 <!-- Current Party -->
-                                                                <ToggleWidget DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Quest.LeftPanel.QuestButton.Active.Width" SuggestedHeight="!Quest.LeftPanel.Toggle.Height" MarginLeft="!Quest.LeftPanel.Toggle.Margin.Left" Brush="Quest.LeftPanel.Toggle" RenderLate="true" WidgetToClose="..\ActiveQuestsList">
+                                                                <ToggleWidget WidgetToClose="..\CurrentPartyList" DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Quest.LeftPanel.QuestButton.Active.Width" SuggestedHeight="!Quest.LeftPanel.Toggle.Height" MarginLeft="!Quest.LeftPanel.Toggle.Margin.Left" Brush="Quest.LeftPanel.Toggle" RenderLate="true">
                                                                     <Children>
                                                                         <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Quest.LeftPanel.Toggle.Text" Text="Current Party" />
                                                                     </Children>
@@ -106,7 +106,7 @@
                                                                 </ListPanel>
 
                                                                 <!-- Graveyard -->
-                                                                <ToggleWidget DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Quest.LeftPanel.QuestButton.Active.Width" SuggestedHeight="!Quest.LeftPanel.Toggle.Height" MarginLeft="!Quest.LeftPanel.Toggle.Margin.Left" Brush="Quest.LeftPanel.Toggle" RenderLate="true" WidgetToClose="..\ActiveQuestsList">
+                                                                <ToggleWidget WidgetToClose="..\GraveyardList" DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Quest.LeftPanel.QuestButton.Active.Width" SuggestedHeight="!Quest.LeftPanel.Toggle.Height" MarginLeft="!Quest.LeftPanel.Toggle.Margin.Left" Brush="Quest.LeftPanel.Toggle" RenderLate="true">
                                                                     <Children>
                                                                         <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Quest.LeftPanel.Toggle.Text" Text="Graveyard" />
                                                                     </Children>
