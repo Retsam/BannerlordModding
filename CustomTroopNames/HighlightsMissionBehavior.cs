@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using SandBox.ViewModelCollection;
 using TaleWorlds.Core;
 using TaleWorlds.Core.ViewModelCollection;
@@ -12,10 +13,9 @@ namespace CustomTroopNames {
         public List<string> HeroKills;
     }
 
-    public class HighlightsMissionBehavior : MissionLogic {
+    public class HighlightsManager {
         private readonly Dictionary<string, HighlightData> _battleStats =
-            new Dictionary<string,
-                HighlightData>();
+            new Dictionary<string, HighlightData>();
 
         private readonly List<string> _deadTroops = new List<string>();
 
@@ -29,33 +29,47 @@ namespace CustomTroopNames {
             return newStats;
         }
 
-        public override void OnAgentRemoved(Agent affectedAgent, Agent affectorAgent,
-            AgentState agentState,
-            KillingBlow blow) {
-            if (affectorAgent == null) return;
+        public void TroopGetsKill(string troopName, [CanBeNull] string killedHero) {
+            var highlights = _getOrInsertDefault(troopName);
+            highlights.Kills += 1;
 
-            // Named unit gets kill
-            var affectorTroopInfo = affectorAgent
-                .GetComponent<CustomNameAgentComponent>()?.TroopInfo;
-            if (affectorTroopInfo != null && affectedAgent.IsHuman) {
-                var highlights = _getOrInsertDefault(affectorTroopInfo.Name);
-                highlights.Kills += 1;
-                if (affectedAgent?.IsHero ?? false) {
-                    if (highlights.HeroKills == null) {
-                        highlights.HeroKills = new List<string>(1);
-                    }
+            if (killedHero == null) return;
+            if (highlights.HeroKills == null) {
+                highlights.HeroKills = new List<string>(1);
+            }
+            highlights.HeroKills.Add(killedHero);
+        }
 
-                    highlights.HeroKills.Add(affectedAgent.Name);
-                }
+        public void TroopDied(string troopName) {
+            _deadTroops.Add(troopName);
+        }
+
+        public void ShowResults(IBattleObserver battleObserver) {
+            if (!(battleObserver is SPScoreboardVM scoreboard)) return;
+            // Log kills
+            var statsList = _battleStats.ToList();
+            statsList.Sort((x, y) => ScoreHighlight(x.Value) - ScoreHighlight(y.Value));
+            List<TooltipProperty> NoTooltip() => new List<TooltipProperty>();
+            foreach (var message in statsList
+                .Select(pair => MessageForTroop(pair.Key, pair.Value))
+                .Where(message => message != null)) {
+                scoreboard.BattleResults.Add(new BattleResultVM(message, NoTooltip));
             }
 
-            // Named unit was killed
-            if (agentState != AgentState.Killed) return;
-
-            var affectedTroopInfo = affectedAgent
-                ?.GetComponent<CustomNameAgentComponent>()?.TroopInfo;
-            if (affectedTroopInfo != null) {
-                _deadTroops.Add(affectedTroopInfo.Name);
+            // Log deaths
+            if (_deadTroops.Count == 0) return;
+            const int maxTroopsToName = 3;
+            var allTroopsMsg = $"{_joinNames(_deadTroops)} died!";
+            if (_deadTroops.Count <= maxTroopsToName) {
+                scoreboard.BattleResults.Add(new BattleResultVM(allTroopsMsg, NoTooltip));
+            }
+            else {
+                var msg =
+                    $"{_joinNames(_deadTroops.GetRange(0, maxTroopsToName))} and {_deadTroops.Count - maxTroopsToName} others died!";
+                scoreboard.BattleResults.Add(new BattleResultVM(msg, () =>
+                    new List<TooltipProperty> {
+                        new TooltipProperty(string.Empty, allTroopsMsg, 0)
+                    }));
             }
         }
 
@@ -100,37 +114,40 @@ namespace CustomTroopNames {
         private static int ScoreHighlight(HighlightData data) {
             return 10 * (data.HeroKills?.Count ?? 0) + data.Kills;
         }
+    }
+
+    public class HighlightsMissionBehavior : MissionLogic {
+        private readonly HighlightsManager _highlightsManager = new HighlightsManager();
+
+        public override void OnAgentRemoved(Agent affectedAgent, Agent affectorAgent, AgentState agentState, KillingBlow blow) {
+            if (affectorAgent == null) return;
+
+            // Named unit gets kill
+            var affectorTroopInfo = affectorAgent
+                .GetComponent<CustomNameAgentComponent>()?.TroopInfo;
+            if (affectorTroopInfo != null && affectedAgent.IsHuman) {
+                var killedHeroName = affectedAgent.IsHero ? affectedAgent.Name : null;
+                _highlightsManager.TroopGetsKill(affectorTroopInfo.Name, killedHeroName);
+            }
+
+            // Named unit was killed
+            if (agentState != AgentState.Killed) return;
+
+            var affectedTroopInfo = affectedAgent
+                ?.GetComponent<CustomNameAgentComponent>()?.TroopInfo;
+            if (affectedTroopInfo != null) {
+                _highlightsManager.TroopDied(affectedTroopInfo.Name);
+            }
+        }
 
         public override void ShowBattleResults() {
             base.ShowBattleResults();
-            if (!(Mission.GetMissionBehaviour<BattleObserverMissionLogic>()?
-                .BattleObserver is SPScoreboardVM scoreboard)) return;
-
-            // Log kills
-            var statsList = _battleStats.ToList();
-            statsList.Sort((x, y) => ScoreHighlight(x.Value) - ScoreHighlight(y.Value));
-            List<TooltipProperty> NoTooltip() => new List<TooltipProperty>();
-            foreach (var message in statsList
-                .Select(pair => MessageForTroop(pair.Key, pair.Value))
-                .Where(message => message != null)) {
-                scoreboard.BattleResults.Add(new BattleResultVM(message, NoTooltip));
+            var battleObserver =
+                Mission.GetMissionBehaviour<BattleObserverMissionLogic>();
+            if (battleObserver != null) {
+                _highlightsManager.ShowResults(battleObserver.BattleObserver);
             }
 
-            // Log deaths
-            if (_deadTroops.Count == 0) return;
-            const int maxTroopsToName = 3;
-            var allTroopsMsg = $"{_joinNames(_deadTroops)} died!";
-            if (_deadTroops.Count <= maxTroopsToName) {
-                scoreboard.BattleResults.Add(new BattleResultVM(allTroopsMsg, NoTooltip));
-            }
-            else {
-                var msg =
-                    $"{_joinNames(_deadTroops.GetRange(0, maxTroopsToName))} and {_deadTroops.Count - maxTroopsToName} others died!";
-                scoreboard.BattleResults.Add(new BattleResultVM(msg, () =>
-                    new List<TooltipProperty> {
-                        new TooltipProperty(string.Empty, allTroopsMsg, 0)
-                    }));
-            }
         }
     }
 }

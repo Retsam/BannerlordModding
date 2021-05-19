@@ -31,7 +31,7 @@ namespace CustomTroopNames.Views {
     public class BattleObserverWrapper : IBattleObserver {
         private readonly IBattleObserver _wrappedObserver;
         private readonly CustomTroopNameManager _customTroopNameManager;
-
+        private readonly HighlightsManager _highlightsManager = new HighlightsManager();
         public BattleObserverWrapper(IBattleObserver wrappedObserver,
             CustomTroopNameManager customTroopNameManager) {
             _wrappedObserver = wrappedObserver;
@@ -47,18 +47,43 @@ namespace CustomTroopNames.Views {
                 numberKilled, numberWounded, numberRouted, killCount,
                 numberReadyToUpgrade);
 
-            if (!(battleCombatant is PartyBase party) || party != PartyBase.MainParty) return;
-            if (MapEvent.PlayerMapEvent == null) return; // Shouldn't hit this, but just in case
+            if (
+                !(battleCombatant is PartyBase party)
+                || party != PartyBase.MainParty // Only care about our troops
+                || !(character is CharacterObject charObj) // Not sure what case this is.  Player/Companion kills?
+                || MapEvent.PlayerMapEvent == null // Shouldn't hit this, but just in case
+            ) return;
 
-            var killerSide =
-                MapEvent.PlayerMapEvent.GetMapEventSide(1 - MapEvent.PlayerMapEvent
-                    .PlayerSide);
-            var killerPartyName = killerSide.LeaderParty.Name.ToString();
-            if (!(character is CharacterObject charObj)) return;
-            var totalTroops = party.MemberRoster.GetTroopCount(charObj) + numberKilled;
+            var troopCount = party.MemberRoster.GetTroopCount(charObj);
 
-            for (var i = 0; i < numberKilled; i++) {
-                _customTroopNameManager.AnonymousTroopDied(character, totalTroops - i, $"killed in battle against {killerPartyName}");
+            // Handle troop deaths
+            if (numberKilled > 0) {
+                var killerSide =
+                    MapEvent.PlayerMapEvent.GetMapEventSide(1 - MapEvent.PlayerMapEvent
+                        .PlayerSide);
+                var killerPartyName = killerSide.LeaderParty.Name.ToString();
+                // The troop count is already adjusted, so adjust to get the original count
+                var totalTroops = troopCount + numberKilled;
+
+                for (var i = 0; i < numberKilled; i++) {
+                    var deadTroop = _customTroopNameManager.AnonymousTroopDied(character,
+                        totalTroops - i, $"killed in battle against {killerPartyName}");
+                    if (deadTroop != null) {
+                        _highlightsManager.TroopDied(deadTroop);
+                    }
+                }
+            }
+
+            // Award troop kills
+            if (killCount <= 0) return;
+            var troopGettingKill =
+                _customTroopNameManager.GetRandomTroopForType(character, troopCount);
+            if (troopGettingKill == null) return;
+            troopGettingKill.Kills += killCount;
+            for (var i = 0; i < killCount; i++) {
+                // Not sure if we can figure out killedHero here or not
+                // Probably not.
+                _highlightsManager.TroopGetsKill(troopGettingKill.Name, null);
             }
         }
 
@@ -71,6 +96,7 @@ namespace CustomTroopNames.Views {
 
         public void BattleResultsReady() {
             _wrappedObserver.BattleResultsReady();
+            _highlightsManager.ShowResults(_wrappedObserver);
         }
     }
 }

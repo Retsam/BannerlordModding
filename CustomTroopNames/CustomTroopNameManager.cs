@@ -88,11 +88,19 @@ namespace CustomTroopNames {
                     ModColors.AlertColor));
         }
 
-        public void AnonymousTroopDied(BasicCharacterObject type, int totalTroops, string causeOfDeath) {
+        public CustomTroopInfo GetRandomTroopForType(BasicCharacterObject type, int totalTroops) {
             _troopNameMapping.TryGetValue(type.Name.ToString(), out var troops);
-            var troopToKill = Rnd.Next(totalTroops);
-            if (troops == null || troops.Count == 0 || troopToKill >= troops.Count) return;
-            TroopDied(type, troops[troopToKill], causeOfDeath);
+            var randomIndex = Rnd.Next(totalTroops);
+            if (troops == null || troops.Count == 0 || randomIndex >= troops.Count) return null;
+            return troops[randomIndex];
+        }
+
+        // Returns the name (or null!) so the Simulator can display who died in its results
+        public string AnonymousTroopDied(BasicCharacterObject type, int totalTroops, string causeOfDeath) {
+            var troopToKill = GetRandomTroopForType(type, totalTroops);
+            if (troopToKill == null) return null;
+            TroopDied(type, troopToKill, causeOfDeath);
+            return troopToKill.Name;
         }
 
         public void TroopDeserted(CharacterObject type, TroopRoster rosterBeforeDesertion) {
