@@ -1,5 +1,6 @@
 ﻿using CustomTroopNames.Views;
 using JetBrains.Annotations;
+using SandBox.View.Map;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.Engine.Screens;
@@ -56,7 +57,7 @@ namespace CustomTroopNames {
                     troopManager.PrintGrave();
                 }
             } else {
-                if (!(ScreenManager.TopScreen is TroopsScreen)) {
+                if (ScreenManager.TopScreen is MapScreen) {
                     ScreenManager.PushScreen(ViewCreatorManager.CreateScreenView<TroopsScreen>());
                 }
 
