@@ -12,7 +12,8 @@
         <Constant Name="Quest.Background.Height" BrushLayer="Default" BrushName="Quest.Background" BrushValueType="Height" />
 
         <Constant Name="Quest.LeftPanel.Toggle.Margin.Left" Value="1" />
-        <Constant Name="Quest.LeftPanel.Toggle.Width" BrushLayer="Default" BrushName="Quest.LeftPanel.Toggle" BrushValueType="Width" />
+        <!-- <Constant Name="Quest.LeftPanel.Toggle.Width" BrushLayer="Default" BrushName="Quest.LeftPanel.Toggle" BrushValueType="Width" /> -->
+        <Constant Name="Quest.LeftPanel.Toggle.Width" Value="800" />
         <Constant Name="Quest.LeftPanel.Toggle.Height" BrushLayer="Default" BrushName="Quest.LeftPanel.Toggle" BrushValueType="Height" />
 
         <Constant Name="Quest.LeftPanel.Header.Width" BrushLayer="Default" BrushName="Quest.LeftPanel.Header" BrushValueType="Width" />
@@ -24,7 +25,8 @@
         <Constant Name="Quest.LeftPanel.QuestDate.Text.XOffset" Value="-3" />
         <Constant Name="Quest.LeftPanel.QuestDate.Text.YOffset" Value="-1" />
 
-        <Constant Name="Quest.LeftPanel.QuestButton.Active.Width" BrushLayer="Default" BrushName="Quest.LeftPanel.QuestButton.Active" BrushValueType="Width" />
+        <!-- <Constant Name="Quest.LeftPanel.QuestButton.Active.Width" BrushLayer="Default" BrushName="Quest.LeftPanel.QuestButton.Active" BrushValueType="Width" /> -->
+        <Constant Name="Quest.LeftPanel.QuestButton.Active.Width" Value="800" />
         <Constant Name="Quest.LeftPanel.QuestButton.Active.Height" BrushLayer="Default" BrushName="Quest.LeftPanel.QuestButton.Active" BrushValueType="Height" />
 
         <Constant Name="RightPanel.QuestStage.Margin.Bottom" Value="15" />
@@ -51,7 +53,8 @@
                 </Standard.Background>
 
                 <!--Top Panel-->
-                <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="755" SuggestedHeight="176" HorizontalAlignment="Center" PositionXOffset="60" Sprite="StdAssets\tabbar_standart" ValueFactor="-30">
+                <!-- <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="755" SuggestedHeight="176" HorizontalAlignment="Center" PositionXOffset="60" Sprite="StdAssets\tabbar_standart" ValueFactor="-30"> -->
+                <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="755" SuggestedHeight="176" HorizontalAlignment="Center" PositionXOffset="250" Sprite="StdAssets\tabbar_standart" ValueFactor="-30">
                     <Children>
                         <RichTextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Top" PositionYOffset="-5" Brush="Quest.CenterPanel.Title.Text" Brush.FontSize="45" Text="Troops" />
                     </Children>
@@ -61,7 +64,7 @@
                     <Children>
 
                         <!--Left Panel-->
-                        <BrushListPanel WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" MarginLeft="27" SuggestedWidth="614" Brush="Frame1Brush" StackLayout.LayoutMethod="VerticalBottomToTop" RenderLate="true">
+                        <BrushListPanel WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" MarginLeft="27" SuggestedWidth="827" Brush="Frame1Brush" StackLayout.LayoutMethod="VerticalBottomToTop" RenderLate="true">
                             <Children>
 
                                 <!--Questlist Header-->
@@ -98,7 +101,7 @@
                                                                         <ButtonWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Quest.LeftPanel.Toggle.Width" SuggestedHeight="!Quest.LeftPanel.Toggle.Height" Brush="Quest.LeftPanel.Toggle">
                                                                             <Children>
                                                                                 <TextWidget Id="TroopNameText" WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" SuggestedWidth="440" MarginLeft="10" MarginRight="10" Brush="Quest.LeftPanel.Quest.Text" Brush.TextHorizontalAlignment="Left" Brush.TextVerticalAlignment="Center" Text="@Name" />
-                                                                                <TextWidget Id="TroopClassText" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginLeft="10" MarginRight="15" Brush="QuestStageTextBrush" Text="@TroopType" />
+                                                                                <TextWidget Id="TroopClassText" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginLeft="10" MarginRight="80" Brush="QuestStageTextBrush" Text="@TroopType" Brush.TextHorizontalAlignment="Right" />
                                                                                 <TextWidget Id="TroopKillsText" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginLeft="10" MarginRight="15" Brush="Quest.LeftPanel.Quest.Time.Text" Text="@Kills" />
                                                                             </Children>
                                                                         </ButtonWidget>
@@ -117,7 +120,7 @@
                                                                         <ButtonWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Quest.LeftPanel.Toggle.Width" SuggestedHeight="!Quest.LeftPanel.Toggle.Height" Brush="Quest.LeftPanel.Toggle">
                                                                             <Children>
                                                                                 <TextWidget Id="TroopNameText" WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" SuggestedWidth="440" MarginLeft="10" MarginRight="10" Brush="Quest.LeftPanel.Quest.Text" Brush.TextHorizontalAlignment="Left" Brush.TextVerticalAlignment="Center" Text="@Name" />
-                                                                                <TextWidget Id="TroopClassText" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginLeft="10" MarginRight="15" Brush="QuestStageTextBrush" Text="@TroopType" />
+                                                                                <TextWidget Id="TroopClassText" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginLeft="10" MarginRight="80" Brush="QuestStageTextBrush" Text="@TroopType" Brush.TextHorizontalAlignment="Right" />
                                                                                 <TextWidget Id="TroopKillsText" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginLeft="10" MarginRight="15" Brush="Quest.LeftPanel.Quest.Time.Text" Text="@Kills" />
                                                                             </Children>
                                                                         </ButtonWidget>
