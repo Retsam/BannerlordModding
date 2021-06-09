@@ -98,5 +98,10 @@ namespace CustomTroopNames.Views {
             _wrappedObserver.BattleResultsReady();
             _highlightsManager.ShowResults(_wrappedObserver);
         }
+
+        public void TroopSideChanged(BattleSideEnum prevSide, BattleSideEnum newSide,
+            IBattleCombatant battleCombatant, BasicCharacterObject character) {
+            _wrappedObserver.TroopSideChanged(prevSide, newSide, battleCombatant, character);
+        }
     }
 }
