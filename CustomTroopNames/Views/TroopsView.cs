@@ -1,3 +1,4 @@
+using System;
 using JetBrains.Annotations;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
@@ -14,11 +15,12 @@ namespace CustomTroopNames.Views {
         public override bool IsMenuState => true;
     }
 
-    public class CustomTroopInfoVm: ViewModel {
+    public class CustomTroopInfoVm: ViewModel, IComparable<CustomTroopInfoVm> {
+        private readonly int _kills;
         public CustomTroopInfoVm(string troopKind, CustomTroopInfo info) {
             Name = info.Name;
             TroopType = troopKind;
-            Kills = $"{info.Kills} kills";
+            _kills = info.Kills;
         }
         public CustomTroopInfoVm(DeadTroopInfo info): this(info.TroopType, info.Info) {}
 
@@ -29,7 +31,11 @@ namespace CustomTroopNames.Views {
         [DataSourceProperty] public string TroopType { get; set; }
 
         [UsedImplicitly]
-        [DataSourceProperty] public string Kills { get; set; }
+        [DataSourceProperty] public string KillsText => $"{_kills} kills";
+
+        public int CompareTo(CustomTroopInfoVm other) {
+            return -_kills.CompareTo(other._kills);
+        }
     }
 
 

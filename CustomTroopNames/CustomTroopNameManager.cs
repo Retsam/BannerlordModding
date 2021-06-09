@@ -215,11 +215,14 @@ namespace CustomTroopNames {
                     troops.Add(new CustomTroopInfoVm(pair.Key, troopInfo));
                 }
             }
+            troops.Sort();
 
             var deadTroops = new MBBindingList<CustomTroopInfoVm>();
             foreach (var troop in _troopGraveyard) {
                 deadTroops.Add(new CustomTroopInfoVm(troop));
             }
+            deadTroops.Sort();
+
             return (troops, deadTroops);
         }
 

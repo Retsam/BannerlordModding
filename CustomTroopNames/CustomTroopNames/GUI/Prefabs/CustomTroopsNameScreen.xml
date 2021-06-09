@@ -102,7 +102,7 @@
                                                                             <Children>
                                                                                 <TextWidget Id="TroopNameText" WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" SuggestedWidth="440" MarginLeft="10" MarginRight="10" Brush="Quest.LeftPanel.Quest.Text" Brush.TextHorizontalAlignment="Left" Brush.TextVerticalAlignment="Center" Text="@Name" />
                                                                                 <TextWidget Id="TroopClassText" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginLeft="10" MarginRight="80" Brush="QuestStageTextBrush" Text="@TroopType" Brush.TextHorizontalAlignment="Right" />
-                                                                                <TextWidget Id="TroopKillsText" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginLeft="10" MarginRight="15" Brush="Quest.LeftPanel.Quest.Time.Text" Text="@Kills" />
+                                                                                <TextWidget Id="TroopKillsText" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginLeft="10" MarginRight="15" Brush="Quest.LeftPanel.Quest.Time.Text" Text="@KillsText" />
                                                                             </Children>
                                                                         </ButtonWidget>
                                                                     </ItemTemplate>
@@ -121,7 +121,7 @@
                                                                             <Children>
                                                                                 <TextWidget Id="TroopNameText" WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" SuggestedWidth="440" MarginLeft="10" MarginRight="10" Brush="Quest.LeftPanel.Quest.Text" Brush.TextHorizontalAlignment="Left" Brush.TextVerticalAlignment="Center" Text="@Name" />
                                                                                 <TextWidget Id="TroopClassText" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginLeft="10" MarginRight="80" Brush="QuestStageTextBrush" Text="@TroopType" Brush.TextHorizontalAlignment="Right" />
-                                                                                <TextWidget Id="TroopKillsText" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginLeft="10" MarginRight="15" Brush="Quest.LeftPanel.Quest.Time.Text" Text="@Kills" />
+                                                                                <TextWidget Id="TroopKillsText" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginLeft="10" MarginRight="15" Brush="Quest.LeftPanel.Quest.Time.Text" Text="@KillsText" />
                                                                             </Children>
                                                                         </ButtonWidget>
                                                                     </ItemTemplate>
